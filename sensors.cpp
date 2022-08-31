@@ -18,17 +18,22 @@ void read_ultrasonic(/* Parameters */){
 }
 
 // Read infrared value
-void read_infrared(/* Parameters */){
-  Serial.println("Infrared value \n");  
+void read_infrared(){
+  Left_sensor = analogRead(A9);  
+  Right_sensor = analogRead(A8); 
 }
+
 
 // Read colour sensor value
 void read_colour(/* Parameters */){
   Serial.println("colour value \n");  
 }
 
+void read_endcoder() {
+  
+}
+
 // Pass in data and average the lot
 void sensor_average(/* Parameters */){
   Serial.println("Averaging the sensors \n");
 }
-
