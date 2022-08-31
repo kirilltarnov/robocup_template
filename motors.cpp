@@ -26,6 +26,9 @@ void set_motors() {
     right_motor.writeMicroseconds(1050);
     left_motor.writeMicroseconds(1050);
   } else if (State ==3) {
+    right_motor.writeMicroseconds(1050);
+    left_motor.writeMicroseconds(1950);
+  } else if (State ==4) {
     right_motor.writeMicroseconds(1500);
     left_motor.writeMicroseconds(1500);
   }

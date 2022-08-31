@@ -10,7 +10,10 @@
 #include "Arduino.h"
 
 // Local definitions
-//#define 
+#define encoder1PinA 2
+#define encoder1PinB 3
+#define encoder2PinA 4
+#define encoder2PinB 5
 
 // Read ultrasonic value
 void read_ultrasonic(/* Parameters */){
@@ -29,7 +32,7 @@ void read_colour(/* Parameters */){
   Serial.println("colour value \n");  
 }
 
-void read_endcoder() {
+void read_encoder() {
   
 }
 
