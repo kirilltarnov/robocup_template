@@ -17,17 +17,17 @@ void check_speed_limits(/*parameters*/) {
  */
 
 
-void set_motors() {
+void DC_motors() {
 
   if(State == 1){
-    right_motor.writeMicroseconds(1950);
-    left_motor.writeMicroseconds(1950);
+    right_motor.writeMicroseconds(1900);
+    left_motor.writeMicroseconds(1900);
   }else if (State == 2) {
-    right_motor.writeMicroseconds(1050);
-    left_motor.writeMicroseconds(1050);
+    right_motor.writeMicroseconds(1100);
+    left_motor.writeMicroseconds(1100);
   } else if (State ==3) {
-    right_motor.writeMicroseconds(1050);
-    left_motor.writeMicroseconds(1950);
+    right_motor.writeMicroseconds(1100);
+    left_motor.writeMicroseconds(1900);
   } else if (State ==4) {
     right_motor.writeMicroseconds(1500);
     left_motor.writeMicroseconds(1500);

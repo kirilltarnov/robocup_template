@@ -107,6 +107,7 @@ boolean B_set2 = false;
 
 Servo right_motor;
 Servo left_motor;
+Servo Gate_servo;
 int State = 0;
 
 int Right_sensor;
@@ -131,7 +132,7 @@ Task tread_encoder(ENCODER_READ_TASK_PERIOD,      SENSOR_AVERAGE_NUM_EXECUTE,   
 Task tSensor_average(SENSOR_AVERAGE_PERIOD,      SENSOR_AVERAGE_NUM_EXECUTE,      &sensor_average);
 
 // Task to set the motor speeds and direction
-Task tSet_motor(SET_MOTOR_TASK_PERIOD,           SET_MOTOR_TASK_NUM_EXECUTE,      &set_motors);
+Task tSet_motor(SET_MOTOR_TASK_PERIOD,           SET_MOTOR_TASK_NUM_EXECUTE,      &DC_motors);
 
 // Tasks to scan for weights and collection upon detection
 Task tWeight_scan(WEIGHT_SCAN_TASK_PERIOD,       WEIGHT_SCAN_TASK_NUM_EXECUTE,    &weight_scan);
@@ -185,6 +186,7 @@ void pin_init() {
   attachInterrupt(digitalPinToInterrupt(4), doEncoder2A, CHANGE);
   right_motor.attach(1);
   left_motor.attach(0);
+  Gate_servo.attach(7);
 
   if (!io.begin(SX1509_ADDRESS))
   {

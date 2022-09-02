@@ -11,9 +11,10 @@
 
 extern Servo right_motor;
 extern Servo left_motor;
+extern Servo Gate_servo;
 
 void check_speed_limits(/*parameters*/);
-void set_motors();
+void DC_motors();
 
 
 #endif /* MOTORS_H_ */
