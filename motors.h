@@ -12,6 +12,8 @@
 extern Servo right_motor;
 extern Servo left_motor;
 extern Servo Gate_servo;
+extern Servo pickup_motor;
+extern int encoder_pickup;
 
 void check_speed_limits(/*parameters*/);
 void DC_motors();

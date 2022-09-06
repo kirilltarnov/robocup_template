@@ -15,10 +15,24 @@ void check_speed_limits(/*parameters*/) {
  *It is also a good idea to check whether value to write is valid.
  *It is also a good idea to do so atomically!
  */
-
+//Pick-up motor values (looking at the motor front on):
+//1500-1950 = anticlockwise
+//1050-1500 = clockwise
+//Encoder values:
+//-1760 = OPEN
+//+1700 = CLOSED
 
 void DC_motors() {
-
+  pickup_motor.writeMicroseconds(1400);
+//  if (encoder_pickup > -1 ) {
+//    pickup_motor.writeMicroseconds(1900);
+//  } 
+//  if (encoder_pickup < -1000) {
+//    pickup_motor.writeMicroseconds(1100);
+//    delay(1000);
+//    pickup_motor.writeMicroseconds(1500);
+//  }  
+  
   if(State == 1){
     right_motor.writeMicroseconds(1950);
     left_motor.writeMicroseconds(1950);
