@@ -87,27 +87,35 @@ const byte SX1509_AIO15 = 15;
 #define CHECK_WATCHDOG_TASK_NUM_EXECUTE    0
 #define VICTORY_DANCE_TASK_NUM_EXECUTE     0
 
-// Pin deffinitions
+// Pin definitions
 #define IO_POWER  49
 #define encoder1PinA 2
 #define encoder1PinB 3
 #define encoder2PinA 4
 #define encoder2PinB 5
-
+#define encoder3PinA 31 //Pick-up motor encoder
+#define encoder3PinB 30
+#define encoder1serialpin 0
+#define encoder2serialpin 1
+#define encoder3serialpin 7
 
 // Serial deffinitions
 #define BAUD_RATE 9600
 
 int Encoder_Left = 0;
 int Encoder_Right = 0;
+int encoder_pickup;
 boolean A_set1 = false;
 boolean B_set1 = false;
 boolean A_set2 = false;
 boolean B_set2 = false;
+boolean A_set3 = false;
+boolean B_set3 = false;
 
 Servo right_motor;
 Servo left_motor;
 Servo Gate_servo;
+Servo pickup_motor;
 int State = 0;
 
 int Right_sensor;
@@ -182,11 +190,15 @@ void pin_init() {
   pinMode(encoder1PinB, INPUT); 
   pinMode(encoder2PinA, INPUT); 
   pinMode(encoder2PinB, INPUT);
-  attachInterrupt(digitalPinToInterrupt(2), doEncoder1A, CHANGE);  //Set up an interrupt for each encoder
-  attachInterrupt(digitalPinToInterrupt(4), doEncoder2A, CHANGE);
-  right_motor.attach(1);
-  left_motor.attach(0);
-  Gate_servo.attach(7);
+  pinMode(encoder3PinA, INPUT);
+  pinMode(encoder3PinB, INPUT);
+  attachInterrupt(digitalPinToInterrupt(encoder1PinA), doEncoder1A, CHANGE);  //Set up an interrupt for each encoder
+  attachInterrupt(digitalPinToInterrupt(encoder2PinA), doEncoder2A, CHANGE);
+  attachInterrupt(digitalPinToInterrupt(encoder3PinA), doEncoder3A, CHANGE);
+  right_motor.attach(encoder2serialpin);
+  left_motor.attach(encoder1serialpin);
+  //Gate_servo.attach(7);
+  pickup_motor.attach(encoder3serialpin);
 
   if (!io.begin(SX1509_ADDRESS))
   {
@@ -271,6 +283,7 @@ void task_init() {
 //**********************************************************************************
 void loop() {
   taskManager.execute();    //execute the scheduler
+  Serial.println(encoder_pickup);
   //Serial.println(State);
   //Serial.println("Another scheduler execution cycle has oocured \n");
 }
@@ -297,4 +310,15 @@ void doEncoder2A(){
    B_set2 = digitalRead(encoder2PinB) == HIGH;
   // and adjust counter + if B follows A
   Encoder_Left -= (A_set2 == B_set2) ? +1 : -1;
+}
+
+void doEncoder3A(){
+  // Test transition
+  A_set3 = digitalRead(encoder3PinA) == HIGH;
+  // and adjust counter + if A leads B
+  encoder_pickup += (A_set3 != B_set3) ? +1 : -1;
+  
+  B_set3 = digitalRead(encoder3PinB) == HIGH;
+  // and adjust counter + if B follows A
+  encoder_pickup += (A_set3 == B_set3) ? +1 : -1;
 }
