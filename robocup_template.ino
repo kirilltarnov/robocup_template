@@ -283,7 +283,7 @@ void task_init() {
 //**********************************************************************************
 void loop() {
   taskManager.execute();    //execute the scheduler
-  Serial.println(encoder_pickup);
+  //Serial.println(encoder_pickup);
   //Serial.println(State);
   //Serial.println("Another scheduler execution cycle has oocured \n");
 }

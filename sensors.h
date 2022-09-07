@@ -10,6 +10,7 @@
 extern SX1509 io;
 extern int Right_sensor;
 extern int Left_sensor;
+extern int low_right_sensor;
 extern int Encoder_Right;
 extern int Encoder_Left;
 extern int encoder_pickup;
