@@ -145,7 +145,7 @@ Task tSensor_average(SENSOR_AVERAGE_PERIOD,      SENSOR_AVERAGE_NUM_EXECUTE,    
 Task tSet_motor(SET_MOTOR_TASK_PERIOD,           SET_MOTOR_TASK_NUM_EXECUTE,      &DC_motors);
 
 // Tasks to scan for weights and collection upon detection
-Task tWeight_scan(WEIGHT_SCAN_TASK_PERIOD,       WEIGHT_SCAN_TASK_NUM_EXECUTE,    &weight_scan);
+Task tWeight_scan(WEIGHT_SCAN_TASK_PERIOD,       WEIGHT_SCAN_TASK_NUM_EXECUTE,    &State_machine);
 Task tCollect_weight(COLLECT_WEIGHT_TASK_PERIOD, COLLECT_WEIGHT_TASK_NUM_EXECUTE, &collect_weight);
 
 // Tasks to search for bases and unload weights
@@ -287,7 +287,7 @@ void task_init() {
 void loop() {
   taskManager.execute();    //execute the scheduler
   limit_switch = digitalRead(limit_switch_pin) == HIGH;
-  Serial.println(encoder_pickup);
+  //Serial.println(limit_switch);
   //Serial.println(State);
   //Serial.println("Another scheduler execution cycle has oocured \n");
 }

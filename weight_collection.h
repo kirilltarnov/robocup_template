@@ -13,7 +13,8 @@
 //#include <Herkulex.h>               //smart servo
 #include <Wire.h>                   //for I2C and SPI
 
-extern int State;
+extern int Navigation_State;
+extern int Overall_State;
               //will need sensor library to detect weights
 
 
@@ -21,9 +22,18 @@ extern int State;
 #define NO_WEIGHT               0   
 #define WEIGHT_FOUND            1
 
+//States for Overall State machine 
+#define Startup                 0
+#define Navigation_algorithim   1
+#define weight_pickup           2
+#define Return_tobase           3
 
-
-void weight_scan();
+//States for Navigation State machine 
+#define Moveforward             1
+#define MoveBackward            2
+#define TurnRight               3
+#define TurnLeft                4
+void State_machine();
 
 
 void collect_weight();

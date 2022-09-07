@@ -11,30 +11,70 @@
 #include "sensors.h" 
 
 int turn_angle = 0;
-
-void weight_scan()
+int Overall_State = Startup;
+int Navigation_State = Moveforward;
+void State_machine()
 {
     //Serial.print(io.digitalRead(15));
-  if (State == 0 && io.digitalRead(15) == 1) {
-    State = 1;
-  }else if(State == 1 && (Left_sensor > 550 || Right_sensor > 550)) {
-    State = 2;
-    Encoder_Left = 0;
-    Encoder_Right = 0;
-    turn_angle = random(3000,9000);
-  }else if(State == 2 && Encoder_Left < -500 && Encoder_Right < -500) {
-    State = 3;
-    Encoder_Left = 0;
-    Encoder_Right = 0;
-  } else if(State == 3 && Encoder_Left > turn_angle && Encoder_Right < -turn_angle) {
-    State = 1;
-  }
+  switch(Overall_State) {
+    case Startup:
+      if(io.digitalRead(15) == 1){
+        Overall_State = Navigation_algorithim;
+        Navigation_State = Moveforward;
+      }
+      break;
+    case Navigation_algorithim:
+//      if (weight_detect) {
+//        
+//      }
+      switch (Navigation_State) {
+        case Moveforward:
+          if (Left_sensor > 550 || Right_sensor > 550) {
+            Navigation_State = MoveBackward;
+            Encoder_Left = 0; //reset encoder values 
+            Encoder_Right = 0;
+            turn_angle = random(3000,9000); // determine turn angle
+          }
+          break;
+        case MoveBackward:
+          if (Encoder_Left < -500 && Encoder_Right < -500) {
+            if (turn_angle > 6000){
+              Navigation_State = 4;
+            } else {
+              Navigation_State = 3;
+            }
+            Encoder_Left = 0;
+            Encoder_Right = 0;
+          }
+          break;
+        case TurnRight:
+          if (Encoder_Left > turn_angle && Encoder_Right < -turn_angle) {
+            Navigation_State = Moveforward;
+          }
+          break;
+        case TurnLeft:
+          if(Encoder_Left < -(12000 - turn_angle) && Encoder_Right > (12000 - turn_angle)) {
+            Navigation_State = 1;
+          }
+          break;
+      }
+      break;
+    case weight_pickup:
+      // code block
+      break;
+    case Return_tobase:
+    // code block
+      break;
+    
+}
+  
+
 //  Serial.print("Left_Encoder:");
 //  Serial.print(Encoder_Left);
 //  Serial.print(" Right_Encoder:");
 //  Serial.print(Encoder_Right);
-//  Serial.print(" State:");
-//  Serial.print(State);
+//  Serial.print(" Navigation_State:");
+//  Serial.print(Navigation_State);
 //  Serial.println();
 }
 

@@ -8,10 +8,10 @@
 // SET THIS TO REAL VALUES
 #define MIN_SPEED_CAP 1          //Set the minimum speed value that can be written to the motors
 #define MAX_SPEED_CAP 1           //Set the maximum speed value that can be written to the motors
-#define PICKUP_CAL_SPEED 1750
-#define PICKUP_REV_SPEED 1350
+#define PICKUP_CAL_SPEED 1950
+#define PICKUP_REV_SPEED 1150
 #define PICKUP_FOR_SPEED 1900
-#define PICKUP_ENCODER_DIST_OUT 1300
+#define PICKUP_ENCODER_DIST_OUT 1320
 #define PICKUP_ENCODER_DIST_IN 500
 #define MOTOR_STOP 1500
 

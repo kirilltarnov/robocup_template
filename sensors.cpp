@@ -25,11 +25,11 @@ void read_infrared(){
   Left_sensor = analogRead(A9);  
   Right_sensor = analogRead(A8); 
   low_right_sensor = analogRead(A7);  
-  Serial.print("Right Sensor: ");
-  Serial.print(Right_sensor);
-  Serial.print(" Low Sensor: ");
-  Serial.print(low_right_sensor);
-  Serial.println();
+//  Serial.print("Right Sensor: ");
+//  Serial.print(Right_sensor);
+//  Serial.print(" Low Sensor: ");
+//  Serial.print(low_right_sensor);
+//  Serial.println();
 }
 
 
