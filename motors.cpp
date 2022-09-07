@@ -2,6 +2,8 @@
 #include "Arduino.h"
 #include "weight_collection.h"
 
+bool pickup_calibration_complete = false;
+
 /* Check whether the speed value to be written is within the maximum
  *  and minimum speed caps. Act accordingly.
  *
@@ -23,7 +25,15 @@ void check_speed_limits(/*parameters*/) {
 //+1700 = CLOSED
 
 void DC_motors() {
-  pickup_motor.writeMicroseconds(1400);
+  //Calibrate pickup mechanism encoder
+  if (pickup_calibration_complete == false) {
+    pickup_motor.writeMicroseconds(1400);
+    if (limit_switch == 1) {
+      pickup_motor.writeMicroseconds(1500);
+      pickup_calibration_complete = true;
+    }
+  }
+
 //  if (encoder_pickup > -1 ) {
 //    pickup_motor.writeMicroseconds(1900);
 //  } 

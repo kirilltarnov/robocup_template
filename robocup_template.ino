@@ -98,13 +98,15 @@ const byte SX1509_AIO15 = 15;
 #define encoder1serialpin 0
 #define encoder2serialpin 1
 #define encoder3serialpin 7
+#define limit_switch_pin 20
 
 // Serial deffinitions
 #define BAUD_RATE 9600
 
 int Encoder_Left = 0;
 int Encoder_Right = 0;
-int encoder_pickup;
+int encoder_pickup = 0;
+int limit_switch = 0;
 boolean A_set1 = false;
 boolean B_set1 = false;
 boolean A_set2 = false;
@@ -192,6 +194,7 @@ void pin_init() {
   pinMode(encoder2PinB, INPUT);
   pinMode(encoder3PinA, INPUT);
   pinMode(encoder3PinB, INPUT);
+  pinMode(limit_switch_pin, INPUT);
   attachInterrupt(digitalPinToInterrupt(encoder1PinA), doEncoder1A, CHANGE);  //Set up an interrupt for each encoder
   attachInterrupt(digitalPinToInterrupt(encoder2PinA), doEncoder2A, CHANGE);
   attachInterrupt(digitalPinToInterrupt(encoder3PinA), doEncoder3A, CHANGE);
@@ -283,7 +286,8 @@ void task_init() {
 //**********************************************************************************
 void loop() {
   taskManager.execute();    //execute the scheduler
-  Serial.println(encoder_pickup);
+  limit_switch = digitalRead(limit_switch_pin) == HIGH;
+  //Serial.println(encoder_pickup);
   //Serial.println(State);
   //Serial.println("Another scheduler execution cycle has oocured \n");
 }
