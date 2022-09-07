@@ -286,11 +286,8 @@ void task_init() {
 //**********************************************************************************
 void loop() {
   taskManager.execute();    //execute the scheduler
-<<<<<<< HEAD
   limit_switch = digitalRead(limit_switch_pin) == HIGH;
-=======
->>>>>>> aa394fdaf6ad857ac9eda80db6ae1447a68e8f23
-  //Serial.println(encoder_pickup);
+  Serial.println(encoder_pickup);
   //Serial.println(State);
   //Serial.println("Another scheduler execution cycle has oocured \n");
 }
