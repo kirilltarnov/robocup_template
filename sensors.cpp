@@ -14,7 +14,7 @@
 #define encoder1PinB 3
 #define encoder2PinA 4
 #define encoder2PinB 5
-
+int low_right_sensor;
 // Read ultrasonic value
 void read_ultrasonic(/* Parameters */){
   Serial.println("Ultrasonic value \n");
@@ -24,6 +24,12 @@ void read_ultrasonic(/* Parameters */){
 void read_infrared(){
   Left_sensor = analogRead(A9);  
   Right_sensor = analogRead(A8); 
+  low_right_sensor = analogRead(A7);  
+  Serial.print("Right Sensor: ");
+  Serial.print(Right_sensor);
+  Serial.print(" Low Sensor: ");
+  Serial.print(low_right_sensor);
+  Serial.println();
 }
 
 

@@ -14,7 +14,7 @@ int turn_angle = 0;
 
 void weight_scan()
 {
-    Serial.print(io.digitalRead(15));
+    //Serial.print(io.digitalRead(15));
   if (State == 0 && io.digitalRead(15) == 1) {
     State = 1;
   }else if(State == 1 && (Left_sensor > 550 || Right_sensor > 550)) {
