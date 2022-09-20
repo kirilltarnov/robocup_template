@@ -8,17 +8,27 @@
 
 #include "weight_collection.h"
 #include "Arduino.h"
+#include "motors.h"
 #include "sensors.h" 
 
 int turn_angle = 0;
 int Overall_State = Startup;
-int Navigation_State = Moveforward;
+int Navigation_State = 0;
+int pickup_mechanism = 0;
 void State_machine()
 {
+
+  
+  if (low_right_sensor > 350) {
+    pickup_mechanism = WEIGHT_FOUND;
+  }else {
+    pickup_mechanism = NO_WEIGHT;
+  }
     //Serial.print(io.digitalRead(15));
   switch(Overall_State) {
     case Startup:
       if(io.digitalRead(15) == 1){
+         pickup_calibration_complete = false;
         Overall_State = Navigation_algorithim;
         Navigation_State = Moveforward;
       }

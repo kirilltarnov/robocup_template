@@ -3,7 +3,7 @@
 #include "weight_collection.h"
 
 bool pickup_calibration_complete = false;
-
+bool can_trigger = true;
 /* Check whether the speed value to be written is within the maximum
  *  and minimum speed caps. Act accordingly.
  *
@@ -23,21 +23,29 @@ void check_speed_limits(/*parameters*/) {
 
 void DC_motors() {
   //Calibrate pickup mechanism encoder
-  
-  if (pickup_calibration_complete == false) {
-    pickup_motor.writeMicroseconds(PICKUP_CAL_SPEED);
-    if (limit_switch == 1) {
-      pickup_motor.writeMicroseconds(MOTOR_STOP);
-      pickup_calibration_complete = true;
-      encoder_pickup = 0;
-    }
-  } else {
-    Serial.println("thing");
-    pickup_motor.writeMicroseconds(PICKUP_REV_SPEED);
-    if (encoder_pickup > PICKUP_ENCODER_DIST_OUT) {
-      pickup_motor.writeMicroseconds(MOTOR_STOP);
-    }
+  if(pickup_mechanism == 1 && can_trigger == true) {
+    pickup_calibration_complete = false;
   }
+//  
+//  if (pickup_calibration_complete == false) {
+//    can_trigger = false;
+//    pickup_motor.writeMicroseconds(PICKUP_CAL_SPEED);
+//    if (limit_switch == 1) {
+//      pickup_motor.writeMicroseconds(MOTOR_STOP);
+//      pickup_calibration_complete = true;
+//      encoder_pickup = 0;
+//    }
+//  } else {
+//    Serial.println("thing");
+//    pickup_motor.writeMicroseconds(PICKUP_REV_SPEED);
+//    if (encoder_pickup > PICKUP_ENCODER_DIST_OUT) {
+//      pickup_motor.writeMicroseconds(MOTOR_STOP);
+//      can_trigger = true;
+//    } else {
+//    }
+//    
+//  }
+
 
 //  if (encoder_pickup > -1 ) {
 //    pickup_motor.writeMicroseconds(1900);

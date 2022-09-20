@@ -11,10 +11,12 @@
 
 #include <Servo.h>                  //control the DC motors
 //#include <Herkulex.h>               //smart servo
-#include <Wire.h>                   //for I2C and SPI
+#include <Wire.h>  
+//for I2C and SPI
 
 extern int Navigation_State;
 extern int Overall_State;
+extern int pickup_mechanism;
               //will need sensor library to detect weights
 
 
