@@ -20,9 +20,6 @@ void check_speed_limits(/*parameters*/) {
 //Pick-up motor values (looking at the motor front on):
 //1500-1950 = anticlockwise
 //1050-1500 = clockwise
-//Encoder values:
-//-1760 = OPEN
-//+1700 = CLOSED
 
 void DC_motors() {
   //Calibrate pickup mechanism encoder
@@ -50,18 +47,18 @@ void DC_motors() {
 //    delay(1000);
 //    pickup_motor.writeMicroseconds(1500);
 //  }  
-  if(Navigation_State == 1){
-    right_motor.writeMicroseconds(1950);
-    left_motor.writeMicroseconds(1950);
-  }else if (Navigation_State == 2) {
-    right_motor.writeMicroseconds(1050);
-    left_motor.writeMicroseconds(1050);
-  } else if (Navigation_State == 3) {
-    right_motor.writeMicroseconds(1050);
-    left_motor.writeMicroseconds(1950);
-  } else if (Navigation_State == 4) {
-    right_motor.writeMicroseconds(1950);
-    left_motor.writeMicroseconds(1050);
-  }
+//  if(Navigation_State == 1){
+//    right_motor.writeMicroseconds(1950);
+//    left_motor.writeMicroseconds(1950);
+//  }else if (Navigation_State == 2) {
+//    right_motor.writeMicroseconds(1050);
+//    left_motor.writeMicroseconds(1050);
+//  } else if (Navigation_State == 3) {
+//    right_motor.writeMicroseconds(1050);
+//    left_motor.writeMicroseconds(1950);
+//  } else if (Navigation_State == 4) {
+//    right_motor.writeMicroseconds(1950);
+//    left_motor.writeMicroseconds(1050);
+//  }
 
 }
