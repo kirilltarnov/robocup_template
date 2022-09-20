@@ -27,7 +27,9 @@ void read_infrared(){
   low_right_sensor = analogRead(A7);  
 //  Serial.print("Right Sensor: ");
 //  Serial.print(Right_sensor);
-//  Serial.print(" Low Sensor: ");
+//  Serial.print(" Left Sensor: ");
+//  Serial.print(Left_sensor);
+//  Serial.print(" Left Sensor: ");
 //  Serial.print(low_right_sensor);
 //  Serial.println();
 }
