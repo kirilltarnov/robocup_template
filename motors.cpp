@@ -22,10 +22,13 @@ void check_speed_limits(/*parameters*/) {
 //1050-1500 = clockwise
 
 void DC_motors() {
+//Pick-up motor using a joystick for testing
+pickup_motor.writeMicroseconds(joystick_map_x);
+
   //Calibrate pickup mechanism encoder
-  if(pickup_mechanism == 1 && can_trigger == true) {
-    pickup_calibration_complete = false;
-  }
+  // if(pickup_mechanism == 1 && can_trigger == true) {
+  //   pickup_calibration_complete = false;
+  // }
 //  
 //  if (pickup_calibration_complete == false) {
 //    can_trigger = false;

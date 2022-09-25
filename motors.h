@@ -22,6 +22,7 @@ extern Servo pickup_motor;
 extern int encoder_pickup;
 extern int limit_switch;
 extern bool pickup_calibration_complete;
+extern int joystick_map_x;
 
 void check_speed_limits(/*parameters*/);
 void DC_motors();

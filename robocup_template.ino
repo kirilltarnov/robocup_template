@@ -99,6 +99,7 @@ const byte SX1509_AIO15 = 15;
 #define encoder2serialpin 1
 #define encoder3serialpin 7
 #define limit_switch_pin 20
+#define JOYSTICK_PIN 27
 
 // Serial deffinitions
 #define BAUD_RATE 9600
@@ -107,6 +108,8 @@ int Encoder_Left = 0;
 int Encoder_Right = 0;
 int encoder_pickup = 0;
 int limit_switch = 0;
+int joystick_x_pos = 0;
+int joystick_map_x = 0;
 boolean A_set1 = false;
 boolean B_set1 = false;
 boolean A_set2 = false;
@@ -286,7 +289,11 @@ void task_init() {
 //**********************************************************************************
 void loop() {
   taskManager.execute();    //execute the scheduler
-  limit_switch = digitalRead(limit_switch_pin) == HIGH;
+
+  //Joystick for testing only
+  joystick_x_pos = analogRead(JOYSTICK_PIN);
+  joystick_map_x = map(joystick_x_pos, 0, 950, 1050, 1950);
+  //limit_switch = digitalRead(limit_switch_pin) == HIGH;
   //Serial.println(limit_switch);
   //Serial.println(State);
   //Serial.println("Another scheduler execution cycle has oocured \n");
