@@ -20,15 +20,15 @@ void check_speed_limits(/*parameters*/) {
 //Pick-up motor values (looking at the motor front on):
 //1500-1950 = anticlockwise
 //1050-1500 = clockwise
-//Encoder values:
-//-1760 = OPEN
-//+1700 = CLOSED
 
 void DC_motors() {
+//Pick-up motor using a joystick for testing
+pickup_motor.writeMicroseconds(joystick_map_x);
+
   //Calibrate pickup mechanism encoder
-  if(pickup_mechanism == 1 && can_trigger == true) {
-    pickup_calibration_complete = false;
-  }
+  // if(pickup_mechanism == 1 && can_trigger == true) {
+  //   pickup_calibration_complete = false;
+  // }
 //  
 //  if (pickup_calibration_complete == false) {
 //    can_trigger = false;
@@ -73,5 +73,6 @@ void DC_motors() {
     right_motor.writeMicroseconds(1950);
     left_motor.writeMicroseconds(1050);
   }
+
 
 }
