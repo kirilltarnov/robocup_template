@@ -20,12 +20,14 @@
 #include <TaskScheduler.h>          //scheduler 
 #include <stdlib.h>                  //contains random number generator 
 #include <SparkFunSX1509.h> // Include SX1509 library
+#include <SparkFun_VL53L5CX_Library.h>
 
 // Custom headers
 #include "motors.h"
 #include "sensors.h"
 #include "weight_collection.h"
 #include "return_to_base.h"
+
 
 //**********************************************************************************
 // Local Definitions
@@ -126,6 +128,12 @@ int State = 0;
 int Right_sensor;
 int Left_sensor;
 void infra_red_callback();
+
+SparkFun_VL53L5CX myImager;
+VL53L5CX_ResultsData measurementData; // Result data class structure, 1356 byes of RAM
+
+int imageResolution = 0; //Used to pretty print output
+int imageWidth = 0; //Used to pretty print output
 
 // data variables
 
@@ -229,7 +237,22 @@ void pin_init() {
   io.pinMode(SX1509_AIO14, INPUT);
   io.pinMode(SX1509_AIO15, INPUT);
 
+  Serial.println("Initializing sensor board. This can take up to 10s. Please wait.");
+  if (myImager.begin() == false)
+  {
+    Serial.println(F("Sensor not found - check your wiring. Freezing"));
+    while (1) ;
+  }
   
+  myImager.setResolution(8*8); //Enable all 64 pads
+  
+  imageResolution = myImager.getResolution(); //Query sensor for current resolution - either 4x4 or 8x8
+  imageWidth = sqrt(imageResolution); //Calculate printing width
+  myImager.setRangingMode(SF_VL53L5CX_RANGING_MODE::CONTINUOUS); //Change to continuous to get data in constantly
+  myImager.setSharpenerPercent(80); //Set sharpener percentage to avoid edges of objects being in adjacent zones
+  myImager.setTargetOrder(SF_VL53L5CX_TARGET_ORDER::CLOSEST);
+  myImager.startRanging();
+
 
 }
 
@@ -293,6 +316,27 @@ void loop() {
   //Joystick for testing only
   joystick_x_pos = analogRead(JOYSTICK_PIN);
   joystick_map_x = map(joystick_x_pos, 0, 950, 1050, 1950);
+
+  //Poll sensor for new data (ToF)
+  if (myImager.isDataReady() == true)
+  {
+    if (myImager.getRangingData(&measurementData)) //Read distance data into array
+    {
+      //The ST library returns the data transposed from zone mapping shown in datasheet
+      //Pretty-print data with increasing y, decreasing x to reflect reality
+      for (int y = 0 ; y <= imageWidth * (imageWidth - 1) ; y += imageWidth)
+      {
+        for (int x = imageWidth - 1 ; x >= 0 ; x--)
+        {
+          Serial.print("\t");
+          Serial.print(measurementData.distance_mm[x + y]);
+        }
+        Serial.println();
+      }
+      Serial.println();
+    }
+  }
+  delay(5); //Small delay between polling
   //limit_switch = digitalRead(limit_switch_pin) == HIGH;
   //Serial.println(limit_switch);
   //Serial.println(State);
