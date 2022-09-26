@@ -62,8 +62,10 @@ void DC_motors() {
     right_motor.writeMicroseconds(1950);
     left_motor.writeMicroseconds(1950);
   }else if (Navigation_State == 2) {
-    right_motor.writeMicroseconds(1050);
-    left_motor.writeMicroseconds(1050);
+//    right_motor.writeMicroseconds(1050);
+//    left_motor.writeMicroseconds(1050);
+    right_motor.writeMicroseconds(1500);
+    left_motor.writeMicroseconds(1500);
   } else if (Navigation_State == 3) {
     right_motor.writeMicroseconds(1050);
     left_motor.writeMicroseconds(1950);
