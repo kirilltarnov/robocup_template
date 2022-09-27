@@ -246,7 +246,7 @@ void pin_init() {
   
   myImager.setResolution(8*8); //Enable all 64 pads
   
-  imageResolution = myImager.getResolution(); //Query sensor for current resolution - either 4x4 or 8x8
+  imageResolution = myImager.getResoslution(); //Query sensor for current resolution - either 4x4 or 8x8
   imageWidth = sqrt(imageResolution); //Calculate printing width
   myImager.setRangingMode(SF_VL53L5CX_RANGING_MODE::CONTINUOUS); //Change to continuous to get data in constantly
   myImager.setSharpenerPercent(80); //Set sharpener percentage to avoid edges of objects being in adjacent zones

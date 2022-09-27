@@ -23,7 +23,7 @@ void check_speed_limits(/*parameters*/) {
 
 void DC_motors() {
 //Pick-up motor using a joystick for testing
-pickup_motor.writeMicroseconds(joystick_map_x);
+//pickup_motor.writeMicroseconds(joystick_map_x);
 
   //Calibrate pickup mechanism encoder
   // if(pickup_mechanism == 1 && can_trigger == true) {
@@ -62,10 +62,10 @@ pickup_motor.writeMicroseconds(joystick_map_x);
     right_motor.writeMicroseconds(1950);
     left_motor.writeMicroseconds(1950);
   }else if (Navigation_State == 2) {
-//    right_motor.writeMicroseconds(1050);
-//    left_motor.writeMicroseconds(1050);
-    right_motor.writeMicroseconds(1500);
-    left_motor.writeMicroseconds(1500);
+    right_motor.writeMicroseconds(1050);
+    left_motor.writeMicroseconds(1050);
+//    right_motor.writeMicroseconds(1500);
+//    left_motor.writeMicroseconds(1500);
   } else if (Navigation_State == 3) {
     right_motor.writeMicroseconds(1050);
     left_motor.writeMicroseconds(1950);
