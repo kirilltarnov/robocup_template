@@ -22,13 +22,20 @@ void check_speed_limits(/*parameters*/) {
 //1050-1500 = clockwise
 
 void DC_motors() {
-//Pick-up motor using a joystick for testing
-//pickup_motor.writeMicroseconds(joystick_map_x);
+  //Pick-up motor using a joystick for testing
+  pickup_motor.writeMicroseconds(joystick_map_x);
+//  if(pickup_mechanism == 0){
+//    pickup_motor.writeMicroseconds(1500);
+//  } else if(pickup_mechanism == 1) {
+//    pickup_motor.writeMicroseconds(1950);
+//  } else {
+//    pickup_motor.writeMicroseconds(1500);
+//  }
 
-  //Calibrate pickup mechanism encoder
-  // if(pickup_mechanism == 1 && can_trigger == true) {
-  //   pickup_calibration_complete = false;
-  // }
+//  Calibrate pickup mechanism encoder
+//   if(pickup_mechanism == 1 && can_trigger == true) {
+//     pickup_calibration_complete = false;
+//   }
 //  
 //  if (pickup_calibration_complete == false) {
 //    can_trigger = false;
@@ -58,21 +65,21 @@ void DC_motors() {
 //    delay(1000);
 //    pickup_motor.writeMicroseconds(1500);
 //  }  
-  if(Navigation_State == 1){
-    right_motor.writeMicroseconds(1950);
-    left_motor.writeMicroseconds(1950);
-  }else if (Navigation_State == 2) {
-    right_motor.writeMicroseconds(1050);
-    left_motor.writeMicroseconds(1050);
-//    right_motor.writeMicroseconds(1500);
-//    left_motor.writeMicroseconds(1500);
-  } else if (Navigation_State == 3) {
-    right_motor.writeMicroseconds(1050);
-    left_motor.writeMicroseconds(1950);
-  } else if (Navigation_State == 4) {
-    right_motor.writeMicroseconds(1950);
-    left_motor.writeMicroseconds(1050);
-  }
+//  if(Navigation_State == 1){
+//    right_motor.writeMicroseconds(1950);
+//    left_motor.writeMicroseconds(1950);
+//  }else if (Navigation_State == 2) {
+//    right_motor.writeMicroseconds(1050);
+//    left_motor.writeMicroseconds(1050);
+////    right_motor.writeMicroseconds(1500);
+////    left_motor.writeMicroseconds(1500);
+//  } else if (Navigation_State == 3) {
+//    right_motor.writeMicroseconds(1050);
+//    left_motor.writeMicroseconds(1950);
+//  } else if (Navigation_State == 4) {
+//    right_motor.writeMicroseconds(1950);
+//    left_motor.writeMicroseconds(1050);
+//  }
 
 
 }

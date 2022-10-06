@@ -14,7 +14,7 @@ extern int low_right_sensor;
 extern int Encoder_Right;
 extern int Encoder_Left;
 extern int encoder_pickup;
-
+extern int limit_switch;
 // Read ultrasonic value
 void read_ultrasonic(/* Parameters */);
 
@@ -23,7 +23,7 @@ void read_infrared();
 
 void read_colour(/* Parameters */);
 
-void read_encoder();
+void read_limit();
 
 // Pass in data and average the lot
 void sensor_average(/* Parameters */);

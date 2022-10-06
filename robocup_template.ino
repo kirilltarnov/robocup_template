@@ -60,7 +60,7 @@ const byte SX1509_AIO15 = 15;
 #define IR_READ_TASK_PERIOD                 40
 #define COLOUR_READ_TASK_PERIOD             40
 #define SENSOR_AVERAGE_PERIOD               40
-#define ENCODER_READ_TASK_PERIOD            0
+#define read_limit_TASK_PERIOD            0
 #define SET_MOTOR_TASK_PERIOD               40
 #define WEIGHT_SCAN_TASK_PERIOD             40
 #define COLLECT_WEIGHT_TASK_PERIOD          40
@@ -69,6 +69,7 @@ const byte SX1509_AIO15 = 15;
 #define UNLOAD_WEIGHTS_TASK_PERIOD          40
 #define CHECK_WATCHDOG_TASK_PERIOD          40
 #define VICTORY_DANCE_TASK_PERIOD           40
+#define Jamming_check_period                40             
 
 
 
@@ -78,7 +79,7 @@ const byte SX1509_AIO15 = 15;
 #define US_READ_TASK_NUM_EXECUTE           0
 #define IR_READ_TASK_NUM_EXECUTE           -1
 #define COLOUR_READ_TASK_NUM_EXECUTE       0
-#define ENCODER_READ_TASK_NUM_EXECUTE      0
+#define read_limit_TASK_NUM_EXECUTE      0
 #define SENSOR_AVERAGE_NUM_EXECUTE         0
 #define SET_MOTOR_TASK_NUM_EXECUTE         -1
 #define WEIGHT_SCAN_TASK_NUM_EXECUTE       -1
@@ -88,6 +89,7 @@ const byte SX1509_AIO15 = 15;
 #define UNLOAD_WEIGHTS_TASK_NUM_EXECUTE    0
 #define CHECK_WATCHDOG_TASK_NUM_EXECUTE    0
 #define VICTORY_DANCE_TASK_NUM_EXECUTE     0
+#define Jamming_check_NUM_EXECUTE          1   
 
 // Pin definitions
 #define IO_POWER  49
@@ -109,7 +111,7 @@ const byte SX1509_AIO15 = 15;
 int Encoder_Left = 0;
 int Encoder_Right = 0;
 int encoder_pickup = 0;
-int limit_switch = 0;
+
 int joystick_x_pos = 0;
 int joystick_map_x = 0;
 boolean A_set1 = false;
@@ -149,9 +151,9 @@ int imageWidth = 0; //Used to pretty print output
 Task tRead_ultrasonic(US_READ_TASK_PERIOD,       US_READ_TASK_NUM_EXECUTE,        &read_ultrasonic);
 Task tRead_infrared(IR_READ_TASK_PERIOD,         IR_READ_TASK_NUM_EXECUTE,        &read_infrared);
 Task tRead_colour(COLOUR_READ_TASK_PERIOD,       COLOUR_READ_TASK_NUM_EXECUTE,    &read_colour);
-Task tread_encoder(ENCODER_READ_TASK_PERIOD,      SENSOR_AVERAGE_NUM_EXECUTE,      &read_encoder);
+Task tread_limit(read_limit_TASK_PERIOD,      SENSOR_AVERAGE_NUM_EXECUTE,      &read_limit);
 Task tSensor_average(SENSOR_AVERAGE_PERIOD,      SENSOR_AVERAGE_NUM_EXECUTE,      &sensor_average);
-
+//Task tJammingcheck(Jamming_check_period,         Jamming_check_NUM_EXECUTE,       &Jamming);
 // Task to set the motor speeds and direction
 Task tSet_motor(SET_MOTOR_TASK_PERIOD,           SET_MOTOR_TASK_NUM_EXECUTE,      &DC_motors);
 
@@ -237,21 +239,21 @@ void pin_init() {
   io.pinMode(SX1509_AIO14, INPUT);
   io.pinMode(SX1509_AIO15, INPUT);
 
-  Serial.println("Initializing sensor board. This can take up to 10s. Please wait.");
-  if (myImager.begin() == false)
-  {
-    Serial.println(F("Sensor not found - check your wiring. Freezing"));
-    while (1) ;
-  }
+//  Serial.println("Initializing sensor board. This can take up to 10s. Please wait.");
+//  if (myImager.begin() == false)
+//  {
+//    Serial.println(F("Sensor not found - check your wiring. Freezing"));
+//    while (1) ;
+//  }
   
-  myImager.setResolution(8*8); //Enable all 64 pads
+//  myImager.setResolution(8*8); //Enable all 64 pads
   
-  imageResolution = myImager.getResoslution(); //Query sensor for current resolution - either 4x4 or 8x8
-  imageWidth = sqrt(imageResolution); //Calculate printing width
-  myImager.setRangingMode(SF_VL53L5CX_RANGING_MODE::CONTINUOUS); //Change to continuous to get data in constantly
-  myImager.setSharpenerPercent(80); //Set sharpener percentage to avoid edges of objects being in adjacent zones
-  myImager.setTargetOrder(SF_VL53L5CX_TARGET_ORDER::CLOSEST);
-  myImager.startRanging();
+//  imageResolution = myImager.getResoslution(); //Query sensor for current resolution - either 4x4 or 8x8
+//  imageWidth = sqrt(imageResolution); //Calculate printing width
+//  myImager.setRangingMode(SF_VL53L5CX_RANGING_MODE::CONTINUOUS); //Change to continuous to get data in constantly
+//  myImager.setSharpenerPercent(80); //Set sharpener percentage to avoid edges of objects being in adjacent zones
+//  myImager.setTargetOrder(SF_VL53L5CX_TARGET_ORDER::CLOSEST);
+//  myImager.startRanging();
 
 
 }
@@ -276,13 +278,14 @@ void task_init() {
   taskManager.addTask(tRead_infrared);
   taskManager.addTask(tRead_colour);
   taskManager.addTask(tSensor_average);
-  taskManager.addTask(tread_encoder);
+  taskManager.addTask(tread_limit);
   taskManager.addTask(tSet_motor);
   taskManager.addTask(tWeight_scan);
   taskManager.addTask(tCollect_weight);
   taskManager.addTask(tReturn_to_base);
   taskManager.addTask(tDetect_base);
   taskManager.addTask(tUnload_weights);
+  //taskManager.addTask(tJammingcheck);
 
   //taskManager.addTask(tCheck_watchdog);
   //taskManager.addTask(tVictory_dance);
@@ -290,7 +293,7 @@ void task_init() {
   //enable the tasks
 //  tRead_ultrasonic.enable();
   tRead_infrared.enable();
-  tread_encoder.enable();
+  tread_limit.enable();
 //  tRead_colour.enable();
 //  tSensor_average.enable();
   tSet_motor.enable();
@@ -312,35 +315,39 @@ void task_init() {
 //**********************************************************************************
 void loop() {
   taskManager.execute();    //execute the scheduler
-
+  //Serial.println(joystick_map_x);
   //Joystick for testing only
   joystick_x_pos = analogRead(JOYSTICK_PIN);
   joystick_map_x = map(joystick_x_pos, 0, 950, 1050, 1950);
-
+//  if (pickup_mechanism == WEIGHT_FOUND) {
+//    tJammingcheck.enable();
+//  } else{
+//    tJammingcheck.disable();
+//  }
   //Poll sensor for new data (ToF)
-  if (myImager.isDataReady() == true)
-  {
-    if (myImager.getRangingData(&measurementData)) //Read distance data into array
-    {
-      //The ST library returns the data transposed from zone mapping shown in datasheet
-      //Pretty-print data with increasing y, decreasing x to reflect reality
-      for (int y = 0 ; y <= imageWidth * (imageWidth - 1) ; y += imageWidth)
-      {
-        for (int x = imageWidth - 1 ; x >= 0 ; x--)
-        {
-          Serial.print("\t");
-          Serial.print(measurementData.distance_mm[x + y]);
-        }
-        Serial.println();
-      }
-      Serial.println();
-    }
-  }
-  delay(5); //Small delay between polling
+//  if (myImager.isDataReady() == true)
+//  {
+//    if (myImager.getRangingData(&measurementData)) //Read distance data into array
+//    {
+//      //The ST library returns the data transposed from zone mapping shown in datasheet
+//      //Pretty-print data with increasing y, decreasing x to reflect reality
+//      for (int y = 0 ; y <= imageWidth * (imageWidth - 1) ; y += imageWidth)
+//      {
+//        for (int x = imageWidth - 1 ; x >= 0 ; x--)
+//        {
+//          Serial.print("\t");
+//          Serial.print(measurementData.distance_mm[x + y]);
+//        }
+//        Serial.println();
+//      }
+//      Serial.println();
+//    }
+//  }
+//  delay(5); //Small delay between polling
   //limit_switch = digitalRead(limit_switch_pin) == HIGH;
-  //Serial.println(limit_switch);
-  //Serial.println(State);
-  //Serial.println("Another scheduler execution cycle has oocured \n");
+//  Serial.println(limit_switch);
+//  Serial.println(State);
+//  Serial.println("Another scheduler execution cycle has oocured \n");
 }
 
 void doEncoder1A(){
