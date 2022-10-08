@@ -110,6 +110,7 @@ const byte SX1509_AIO15 = 15;
 //VL53L5CX object detection set-up
 #define WEIGHT_ZONE_NUM 1 //a weight should take up a certain amount of zones
 #define VL53L5CX_MEDIAN_RANGE_MM 200 //range to detect weight from [mm]
+#define DISTANCE_CHANGE 200 //used to detect a change of distance in a zone (weight detection)
 
 
 // Serial deffinitions
@@ -132,6 +133,7 @@ boolean set_thresh_enable = true;
 boolean get_thresh_enable = true;
 boolean set_thresh_status = true;
 boolean get_thresh_status = true;
+uint16_t measurement_old [3][3]; //16 int array to hold previous time-step data
 
 Servo right_motor;
 Servo left_motor;
@@ -367,11 +369,12 @@ void loop() {
   // weight_found = io.digitalRead(SX1509_AIO0); 
   // Serial.println(weight_found);
  //Poll sensor for new data (ToF)
- 
+  
  if (myImager.isDataReady() == true)
  {
    if (myImager.getRangingData(&measurementData)) //Read distance data into array
    {
+      
      //The ST library returns the data transposed from zone mapping shown in datasheet
      //Pretty-print data with increasing y, decreasing x to reflect reality
      for (int y = 0 ; y <= imageWidth * (imageWidth - 1) ; y += imageWidth)
@@ -381,7 +384,13 @@ void loop() {
          Serial.print("\t");
          measurement_rounded = measurementData.distance_mm[x+y]/10;
          measurement_rounded = round(measurement_rounded)*10;
-         Serial.print(int(measurement_rounded));
+         measurement_rounded = int(measurement_rounded); //convert from double to int
+         measurement_old[y][x] = measurement_rounded; //place rounded data in a 
+        //  Serial.print(measurement_old);
+        //  if (abs(measurement_rounded-measurement_old) > DISTANCE_CHANGE) {
+        //     Serial.print("Weight Found");
+        //  }
+        
        }
        Serial.println();
      }
@@ -389,6 +398,7 @@ void loop() {
    }
  }
  delay(5); //Small delay between polling
+ 
 
 //  if (pickup_mechanism == WEIGHT_FOUND) {
 //    tJammingcheck.enable();
