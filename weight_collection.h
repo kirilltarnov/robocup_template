@@ -31,15 +31,21 @@ extern int pickup_mechanism;
 #define Return_tobase           3
 
 //States for Navigation State machine 
-#define Moveforward             1
-#define MoveBackward            2
-#define TurnRight               3
-#define TurnLeft                4
+#define Moveforward             0
+#define MoveBackward            1
+#define TurnRight               2
+#define TurnLeft                3
+
+//States for Weight pickup State machine 
+#define No_weight               0
+#define Weight                  1
+#define reseting                2
+#define jamming                 3
 void State_machine();
 
 
 void collect_weight();
 
-
+void Jamming();
 
 #endif /* WEIGHT_COLLECTION_H_ */

@@ -40,8 +40,8 @@ void read_colour(/* Parameters */){
   Serial.println("colour value \n");  
 }
 
-void read_encoder() {
-  
+void read_limit() {
+    limit_switch = digitalRead(20) == HIGH;
 }
 
 // Pass in data and average the lot
