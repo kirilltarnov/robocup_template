@@ -22,7 +22,6 @@
 #include <SparkFunSX1509.h> // Include SX1509 library
 #include <SparkFun_VL53L5CX_Library.h>
 #include <vl53l5cx_plugin_detection_thresholds.h>
-#include <eloquent.h>
 
 // Custom headers
 #include "motors.h"
