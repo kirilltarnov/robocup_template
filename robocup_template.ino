@@ -21,6 +21,8 @@
 #include <stdlib.h>                  //contains random number generator 
 #include <SparkFunSX1509.h> // Include SX1509 library
 #include <SparkFun_VL53L5CX_Library.h>
+#include <vl53l5cx_plugin_detection_thresholds.h>
+#include <eloquent.h>
 
 // Custom headers
 #include "motors.h"
@@ -37,22 +39,22 @@ const byte SX1509_ADDRESS = 0x3E;  // SX1509 I2C address
 SX1509 io; // Create an SX1509 object to be used throughout
 
 // SX1509 Pins:
-const byte SX1509_AIO0 = 0; 
-const byte SX1509_AIO1 = 1; 
-const byte SX1509_AIO2 = 2; 
-const byte SX1509_AIO3 = 3; 
-const byte SX1509_AIO4 = 4; 
-const byte SX1509_AIO5 = 5; 
-const byte SX1509_AIO6 = 6; 
-const byte SX1509_AIO7 = 7; 
-const byte SX1509_AIO8 = 8; 
-const byte SX1509_AIO9 = 9; 
-const byte SX1509_AIO10 = 10; 
-const byte SX1509_AIO11 = 11; 
-const byte SX1509_AIO12 = 12; 
-const byte SX1509_AIO13 = 13; 
-const byte SX1509_AIO14 = 14; 
-const byte SX1509_AIO15 = 15; 
+const byte SX1509_AIO0 = 0;
+const byte SX1509_AIO1 = 1;
+const byte SX1509_AIO2 = 2;
+const byte SX1509_AIO3 = 3;
+const byte SX1509_AIO4 = 4;
+const byte SX1509_AIO5 = 5;
+const byte SX1509_AIO6 = 6;
+const byte SX1509_AIO7 = 7;
+const byte SX1509_AIO8 = 8;
+const byte SX1509_AIO9 = 9;
+const byte SX1509_AIO10 = 10;
+const byte SX1509_AIO11 = 11;
+const byte SX1509_AIO12 = 12;
+const byte SX1509_AIO13 = 13;
+const byte SX1509_AIO14 = 14;
+const byte SX1509_AIO15 = 15;
 
 // Task period Definitions
 // ALL OF THESE VALUES WILL NEED TO BE SET TO SOMETHING USEFUL !!!!!!!!!!!!!!!!!!!!
@@ -103,6 +105,11 @@ const byte SX1509_AIO15 = 15;
 #define limit_switch_pin 20
 #define JOYSTICK_PIN 27
 
+//VL53L5CX object detection set-up
+#define WEIGHT_ZONE_NUM 1 //a weight should take up a certain amount of zones
+#define VL53L5CX_MEDIAN_RANGE_MM 200 //range to detect weight from [mm]
+
+
 // Serial deffinitions
 #define BAUD_RATE 9600
 
@@ -118,6 +125,11 @@ boolean A_set2 = false;
 boolean B_set2 = false;
 boolean A_set3 = false;
 boolean B_set3 = false;
+boolean weight_found = false;
+boolean set_thresh_enable = true;
+boolean get_thresh_enable = true;
+boolean set_thresh_status = true;
+boolean get_thresh_status = true;
 
 Servo right_motor;
 Servo left_motor;
@@ -131,9 +143,12 @@ void infra_red_callback();
 
 SparkFun_VL53L5CX myImager;
 VL53L5CX_ResultsData measurementData; // Result data class structure, 1356 byes of RAM
+VL53L5CX_DetectionThresholds detectionThresholds;
 
 int imageResolution = 0; //Used to pretty print output
 int imageWidth = 0; //Used to pretty print output
+
+double measurement_rounded = 0;
 
 // data variables
 
@@ -186,7 +201,7 @@ void setup() {
   pin_init();
   robot_init();
   task_init();
-  
+
 }
 
 //**********************************************************************************
@@ -200,8 +215,8 @@ void pin_init() {
   pinMode(IO_POWER, OUTPUT);              //Pin 49 is used to enable IO power
   digitalWrite(IO_POWER, 1);              //Enable IO power on main CPU board
   pinMode(encoder1PinA, INPUT);       //Set encoder pins as inputs
-  pinMode(encoder1PinB, INPUT); 
-  pinMode(encoder2PinA, INPUT); 
+  pinMode(encoder1PinB, INPUT);
+  pinMode(encoder2PinA, INPUT);
   pinMode(encoder2PinB, INPUT);
   pinMode(encoder3PinA, INPUT);
   pinMode(encoder3PinB, INPUT);
@@ -243,16 +258,31 @@ void pin_init() {
     Serial.println(F("Sensor not found - check your wiring. Freezing"));
     while (1) ;
   }
-  
-  myImager.setResolution(8*8); //Enable all 64 pads
-  
-  imageResolution = myImager.getResoslution(); //Query sensor for current resolution - either 4x4 or 8x8
+
+  myImager.setResolution(4 * 4); //Enable all 64 pads
+
+  imageResolution = myImager.getResolution(); //Query sensor for current resolution - either 4x4 or 8x8
   imageWidth = sqrt(imageResolution); //Calculate printing width
   myImager.setRangingMode(SF_VL53L5CX_RANGING_MODE::CONTINUOUS); //Change to continuous to get data in constantly
-  myImager.setSharpenerPercent(80); //Set sharpener percentage to avoid edges of objects being in adjacent zones
+  myImager.setSharpenerPercent(100); //Set sharpener percentage to avoid edges of objects being in adjacent zones
   myImager.setTargetOrder(SF_VL53L5CX_TARGET_ORDER::CLOSEST);
   myImager.startRanging();
 
+  // //enable detection thresholds, '1' to enable thresholds. This allows to set parameters and get parameters
+  // set_thresh_enable = vl53l5cx_set_detection_thresholds_enable(myimager.dev, 1);
+  // get_thresh_enable = vl53l5cx_get_detection_thresholds_enable(myimager.dev, 1); 
+ 
+  // //parametise the detection thresholds
+  // detectionThresholds.zone_num = WEIGHT_ZONE_NUM;
+  // detectionThresholds.measurement = VL53L5CX_MEDIAN_RANGE_MM;
+  // detectionThresholds.type = VL53L5CX_LESS_THAN_EQUAL_MIN_CHECKER; //**NOT 100% sure on which type makes sense
+
+  // //set thresholds
+  // set_thresh_status = vl53l5cx_set_detection_thresholds(myimager.dev, &detectionThresholds);
+
+  // //get_thresh_status = vl53l5cx_get_detection_thresholds(myimager.dev, &detectionThresholds); 
+  
+  
 
 }
 
@@ -288,17 +318,17 @@ void task_init() {
   //taskManager.addTask(tVictory_dance);
 
   //enable the tasks
-//  tRead_ultrasonic.enable();
+  //  tRead_ultrasonic.enable();
   tRead_infrared.enable();
   tread_encoder.enable();
-//  tRead_colour.enable();
-//  tSensor_average.enable();
+  //  tRead_colour.enable();
+  //  tSensor_average.enable();
   tSet_motor.enable();
   tWeight_scan.enable();
-//  tCollect_weight.enable();
-//  tReturn_to_base.enable();
-//  tDetect_base.enable();
-//  tUnload_weights.enable();
+  //  tCollect_weight.enable();
+  //  tReturn_to_base.enable();
+  //  tDetect_base.enable();
+  //  tUnload_weights.enable();
   //tCheck_watchdog.enable();
   //tVictory_dance.enable();
 
@@ -316,39 +346,50 @@ void loop() {
   //Joystick for testing only
   joystick_x_pos = analogRead(JOYSTICK_PIN);
   joystick_map_x = map(joystick_x_pos, 0, 950, 1050, 1950);
+  // if (set_thresh_enable == 0) {
+  //   Serial.println("VL sensor threshold ENABLED");
+  // }
+  // if (set_thresh_status == 0) {
+  //   Serial.println("VL sensor threshold SET");
+  // }
+  // weight_found = io.digitalRead(SX1509_AIO0); 
+  // Serial.println(weight_found);
+ //Poll sensor for new data (ToF)
+ 
+ if (myImager.isDataReady() == true)
+ {
+   if (myImager.getRangingData(&measurementData)) //Read distance data into array
+   {
+     //The ST library returns the data transposed from zone mapping shown in datasheet
+     //Pretty-print data with increasing y, decreasing x to reflect reality
+     for (int y = 0 ; y <= imageWidth * (imageWidth - 1) ; y += imageWidth)
+     {
+       for (int x = imageWidth - 1 ; x >= 0 ; x--)
+       {
+         Serial.print("\t");
+         measurement_rounded = measurementData.distance_mm[x+y]/10;
+         measurement_rounded = round(measurement_rounded)*10;
+         Serial.print(int(measurement_rounded));
+       }
+       Serial.println();
+     }
+     Serial.println();
+   }
+ }
+ delay(5); //Small delay between polling
 
-  //Poll sensor for new data (ToF)
-  if (myImager.isDataReady() == true)
-  {
-    if (myImager.getRangingData(&measurementData)) //Read distance data into array
-    {
-      //The ST library returns the data transposed from zone mapping shown in datasheet
-      //Pretty-print data with increasing y, decreasing x to reflect reality
-      for (int y = 0 ; y <= imageWidth * (imageWidth - 1) ; y += imageWidth)
-      {
-        for (int x = imageWidth - 1 ; x >= 0 ; x--)
-        {
-          Serial.print("\t");
-          Serial.print(measurementData.distance_mm[x + y]);
-        }
-        Serial.println();
-      }
-      Serial.println();
-    }
-  }
-  delay(5); //Small delay between polling
   //limit_switch = digitalRead(limit_switch_pin) == HIGH;
   //Serial.println(limit_switch);
   //Serial.println(State);
   //Serial.println("Another scheduler execution cycle has oocured \n");
 }
 
-void doEncoder1A(){
+void doEncoder1A() {
   // Test transition
   A_set1 = digitalRead(encoder1PinA) == HIGH;
   // and adjust counter + if A leads B
   Encoder_Right += (A_set1 != B_set1) ? +1 : -1;
-  
+
   B_set1 = digitalRead(encoder1PinB) == HIGH;
   // and adjust counter + if B follows A
   Encoder_Right += (A_set1 == B_set1) ? +1 : -1;
@@ -356,23 +397,23 @@ void doEncoder1A(){
 
 
 // Interrupt on A changing state
-void doEncoder2A(){
+void doEncoder2A() {
   // Test transition
   A_set2 = digitalRead(encoder2PinA) == HIGH;
   // and adjust counter + if A leads B
   Encoder_Left -= (A_set2 != B_set2) ? +1 : -1;
-  
-   B_set2 = digitalRead(encoder2PinB) == HIGH;
+
+  B_set2 = digitalRead(encoder2PinB) == HIGH;
   // and adjust counter + if B follows A
   Encoder_Left -= (A_set2 == B_set2) ? +1 : -1;
 }
 
-void doEncoder3A(){
+void doEncoder3A() {
   // Test transition
   A_set3 = digitalRead(encoder3PinA) == HIGH;
   // and adjust counter + if A leads B
   encoder_pickup += (A_set3 != B_set3) ? +1 : -1;
-  
+
   B_set3 = digitalRead(encoder3PinB) == HIGH;
   // and adjust counter + if B follows A
   encoder_pickup += (A_set3 == B_set3) ? +1 : -1;
