@@ -15,6 +15,10 @@ extern int Encoder_Right;
 extern int Encoder_Left;
 extern int encoder_pickup;
 extern int limit_switch;
+extern int buffer1[4][4][10];
+extern int averageinput[4][4];
+extern int head;
+extern int tail;
 
 
 
@@ -30,5 +34,9 @@ void read_limit();
 
 // Pass in data and average the lot
 void sensor_average(/* Parameters */);
+
+void circ_buffer_add(int input[4][4]);
+
+void average_Buffer();
 
 #endif /* SENSORS_H_ */
