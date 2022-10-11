@@ -54,6 +54,7 @@ void DC_motors() {
     case Moveforward:
       right_motor.writeMicroseconds(1950);
       left_motor.writeMicroseconds(1950);
+      
       //Checking if there is an obstruction to the left of the robot, turn right
       if ((Left_sensor > 550 && Right_sensor < 550) || pole_ramp_left){
         Navigation_State = TurnRight;
@@ -148,7 +149,9 @@ void DC_motors() {
       }
       break;
     case 3:
-      if (jam_timer > 90) {
+      if (jam_timer > 25) {
+        
+      } else if (jam_timer > 90) {
         pickup_state = 1;
       }
       jam_timer += 1;
