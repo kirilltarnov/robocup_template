@@ -10,6 +10,7 @@ int pickup_state = 0;
 int Navigation_State = 0;
 int turn_angle = 0;
 int limit_switch_inner;
+uint8_t pick_up_counter = 0;
 /* Check whether the speed value to be written is within the maximum
  *  and minimum speed caps. Act accordingly.
  *
@@ -128,6 +129,10 @@ void DC_motors() {
 
       
   }
+
+  if (limit_switch_outer == 1) {
+    pick_up_counter += 1;
+  }
       
   switch(pickup_state) {
     case 0:
@@ -149,8 +154,13 @@ void DC_motors() {
     //If weight detected, move inward
     case 2:
       if (low_right_sensor > 350) {
-        pickup_motor.writeMicroseconds(1950);
-        pickup_state = 3;
+        if (pick_up_counter > 4) {
+          pickup_state = 3;
+        } else {
+          pickup_motor.writeMicroseconds(1950);
+          pickup_state = 3;
+        }
+
       }
       break;
     case 3:

@@ -18,7 +18,7 @@ extern int encoder_pickup;
 extern int limit_switch;
 extern boolean weight_found;
 
-extern bool limit_switch2;
+extern bool limit_switch_outer;
 
 extern int buffer1[4][4][10];
 extern int averageinput[4][4];
