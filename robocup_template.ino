@@ -111,6 +111,8 @@ const byte SX1509_AIO15 = 15;
 #define WEIGHT_ZONE_NUM 1 //a weight should take up a certain amount of zones
 #define VL53L5CX_MEDIAN_RANGE_MM 200 //range to detect weight from [mm]
 #define DISTANCE_CHANGE 200 //used to detect a change of distance in a zone (weight detection)
+#define WEIGHT_DISTANCE_ZONE -150
+#define POLE_DISTANCE_ZONE -250
 
 
 // Serial deffinitions
@@ -133,7 +135,22 @@ boolean set_thresh_enable = true;
 boolean get_thresh_enable = true;
 boolean set_thresh_status = true;
 boolean get_thresh_status = true;
-uint16_t measurement_old [3][3]; //16 int array to hold previous time-step data
+int VL53_raw_matrix [8][6]; //16 int array to hold previous time-step data
+int VL53_weighted_matrix [8][6]; //16 int array to hold previous time-step data
+// uint16_t col_sum[6];
+// uint16_t col_sum_old[6];
+// uint16_t row_sum[8];
+// uint16_t row_sum_old[8];
+// int8_t weight_row_zone = 0;
+// int8_t weight_col_zone = 0;
+int16_t row_difference = 0; 
+int16_t col_difference = 0; 
+bool pole_ramp_found = false;
+// int8_t counter_average = 0;
+double weighted_sum = 0;
+double raw_sum = 0;
+double residual = 0;
+
 
 Servo right_motor;
 Servo left_motor;
@@ -225,10 +242,16 @@ void pin_init() {
   pinMode(encoder3PinA, INPUT);
   pinMode(encoder3PinB, INPUT);
   pinMode(limit_switch_pin, INPUT);
+<<<<<<< HEAD
   pinMode(limit_switch2_pin, INPUT);
   attachInterrupt(digitalPinToInterrupt(encoder1PinA), doEncoder1A, CHANGE);  //Set up an interrupt for each encoder
   attachInterrupt(digitalPinToInterrupt(encoder2PinA), doEncoder2A, CHANGE);
   attachInterrupt(digitalPinToInterrupt(encoder3PinA), doEncoder3A, CHANGE);
+=======
+  //attachInterrupt(digitalPinToInterrupt(encoder1PinA), doEncoder1A, CHANGE);  //Set up an interrupt for each encoder
+  //attachInterrupt(digitalPinToInterrupt(encoder2PinA), doEncoder2A, CHANGE);
+  //attachInterrupt(digitalPinToInterrupt(encoder3PinA), doEncoder3A, CHANGE);
+>>>>>>> 326ea380b5da39bd2540076e1038ed9950ab05c0
   right_motor.attach(encoder2serialpin);
   left_motor.attach(encoder1serialpin);
   //Gate_servo.attach(7);
@@ -258,6 +281,7 @@ void pin_init() {
   io.pinMode(SX1509_AIO15, INPUT);
 
   Serial.println("Initializing sensor board. This can take up to 10s. Please wait.");
+
 //  if (myImager.begin() == false)
 //  {
 //    Serial.println(F("Sensor not found - check your wiring. Freezing"));
@@ -272,6 +296,7 @@ void pin_init() {
 //  myImager.setSharpenerPercent(100); //Set sharpener percentage to avoid edges of objects being in adjacent zones
 //  myImager.setTargetOrder(SF_VL53L5CX_TARGET_ORDER::CLOSEST);
 //  myImager.startRanging();
+
 
 //  Serial.println("Initializing sensor board. This can take up to 10s. Please wait.");
 //  if (myImager.begin() == false)
@@ -369,6 +394,7 @@ void loop() {
   // }
   // weight_found = io.digitalRead(SX1509_AIO0); 
   // Serial.println(weight_found);
+<<<<<<< HEAD
  //Poll sensor for new data (ToF)
   
 // if (myImager.isDataReady() == true)
@@ -399,38 +425,170 @@ void loop() {
 //   }
 // }
 // delay(5); //Small delay between polling
+=======
+
+  // set old column and row sums
+  // for (int i = 0; i < 5; i++) {
+  //   col_sum_old[i] = col_sum[i];
+  // }
+  // for (int j = 0; j < 7; j++) {
+  //   row_sum_old[j] = row_sum[j];
+  // }
+
+
+  //Poll sensor for new data (ToF)
+ if (myImager.isDataReady() == true)
+ {
+   if (myImager.getRangingData(&measurementData)) //Read distance data into array
+   {
+      
+     //The ST library returns the data transposed from zone mapping shown in datasheet
+     //Pretty-print data with increasing y, decreasing x to reflect reality
+     for (int y = 0 ; y <= imageWidth * (imageWidth - 1) ; y += imageWidth)
+     {
+       for (int x = imageWidth - 3 ; x >= 0 ; x--)
+       {
+        Serial.print("\t");
+        // take the raw data from the VL sensor, round it to a number of 10
+        //  measurement_rounded = measurementData.distance_mm[x+y]/10;
+        //  measurement_rounded = round(measurement_rounded)*10;
+        //  measurement_rounded = int(measurement_rounded); //convert from double to int
+        VL53_raw_matrix[y/imageWidth][x] = measurementData.distance_mm[x+y]; //place rounded data in a matrix 
+        if (x == 5) {
+          VL53_raw_matrix[y/imageWidth][x] -= 490;
+        } else if (x == 4) {
+          VL53_raw_matrix[y/imageWidth][x] -= 400;
+        } else if (x == 3) {
+          VL53_raw_matrix[y/imageWidth][x] -= 340;
+        } else if (x == 2) {
+          VL53_raw_matrix[y/imageWidth][x] -= 300;
+        } else if (x == 1) {
+          VL53_raw_matrix[y/imageWidth][x] -= 280;
+        } else if (x == 0) {
+          VL53_raw_matrix[y/imageWidth][x] -= 250;
+        } 
+        if (y == imageWidth*7) {
+          VL53_weighted_matrix[y/imageWidth][x] = VL53_raw_matrix[y/imageWidth][x] * -2;
+        } else if (y == imageWidth*6) {
+          VL53_weighted_matrix[y/imageWidth][x] = VL53_raw_matrix[y/imageWidth][x] * -1;
+        } else if (y == imageWidth*5) {
+          VL53_weighted_matrix[y/imageWidth][x] = VL53_raw_matrix[y/imageWidth][x] * -0.5;
+        } else if (y == imageWidth*4) {
+          VL53_weighted_matrix[y/imageWidth][x] = VL53_raw_matrix[y/imageWidth][x] * 0;
+        } else if (y == imageWidth*3) {
+          VL53_weighted_matrix[y/imageWidth][x] = VL53_raw_matrix[y/imageWidth][x] * 0;
+        } else if (y == imageWidth*2) {
+          VL53_weighted_matrix[y/imageWidth][x] = VL53_raw_matrix[y/imageWidth][x] * 0.5;
+        } else if (y == imageWidth*1) {
+          VL53_weighted_matrix[y/imageWidth][x] = VL53_raw_matrix[y/imageWidth][x] * 1;
+        } else if (y == imageWidth*0) {
+          VL53_weighted_matrix[y/imageWidth][x] = VL53_raw_matrix[y/imageWidth][x] * 2;
+        } 
+
+        //Serial.print(VL53_weighted_matrix[y/imageWidth][x]);    
+        }
+        //Serial.println();
+      }
+      //Serial.println();
+    }   
+ }
+>>>>>>> 326ea380b5da39bd2540076e1038ed9950ab05c0
  
+  //Sum weighted and raw matrices
+  //weighted_sum = 0;
+  raw_sum = 0;
+  for (int row = 0; row <7; row++) {
+    for (int col = 0; col < 5; col++) {
+      weighted_sum += VL53_weighted_matrix[row][col];
+      raw_sum += VL53_raw_matrix[row][col];
+    }
+  }
+
+  //Find residual
+  residual = 0;
+  residual = weighted_sum/raw_sum; 
+  Serial.println(weighted_sum);
+  // filter the data from the VL53 sensor
+  // circ_buffer_add(VL53_raw_matrix);
+  // average_Buffer();
+  
+  // Use data from VL53 sensor to identify weights, ramp and pole
+  // uint16_t col_sum_temp_array[6] = {0,0,0,0,0,0};
+  // for (int row = 0; row <7; row++) {
+  //   uint16_t row_sum_temp = 0; 
+  //   for (int col = 0; col < 5; col++) {
+  //     //Serial.print("\t");
+  //     row_sum_temp += VL53_raw_matrix[row][col];
+  //     col_sum_temp_array[col] += VL53_raw_matrix[row][col];
+  //     //Serial.print(averageinput[row][col]);
+  //   }
+  //   //Serial.println();
+  //   row_sum[row] = row_sum_temp;
+  // }
+  // //Serial.println();
+  // for (int i = 0; i < 4; i++) {
+  //   col_sum[i] = col_sum_temp_array[i];
+  // }
+
+  // // Checking for ramp, weight and pole (other)
+  // for (int rows = 0; rows < 7; rows++) {
+  //   row_difference = row_sum[rows]-row_sum_old[rows]; //-ve number if something is in the FoV
+  //   //checking if a row has decreased by the distance of 1 weight in a zone
+  //   if (row_difference < WEIGHT_DISTANCE_ZONE) {
+  //     if (row_difference > POLE_DISTANCE_ZONE) {
+  //       weight_found = true; 
+  //       weight_row_zone = rows;
+  //     } else {
+  //       pole_ramp_found = true;
+  //     }
+  //   }
+  // }
+
+  //   for (int cols = 1; cols < 3; cols++) {
+  //     col_difference = col_sum[cols]-col_sum_old[cols]; //-ve number if something is in the FoV
+  //     //checking if a row has decreased by the distance of 1 weight in a zone
+  //     if (col_difference < WEIGHT_DISTANCE_ZONE) {
+  //       if (col_difference > POLE_DISTANCE_ZONE) {
+  //         weight_col_zone = cols;
+  //       } else {
+  //         pole_ramp_found = true;
+  //       }
+  //     }
+  //   }
+
+  // print filtered, rounded data from VL
+  // for (int j = 0; j < 4; j++) {
+  //     Serial.print("\t");
+  //     Serial.print(row_sum[j]);
+  //     Serial.print("\t");
+  //     Serial.println(col_sum[j]);
+  // }
+  // Serial.println();
+  //Serial.println(row_difference);
+  // if (weight_found) {
+  //   Serial.print("Weight found in row: ");
+  //   Serial.print(weight_row_zone);
+  //   Serial.print(", column: ");
+  //   Serial.println(weight_col_zone);
+  //   weight_found = false; 
+  // }
+  delay(100); //Small delay between polling
+}
+
+
+
 
 //  if (pickup_mechanism == WEIGHT_FOUND) {
 //    tJammingcheck.enable();
 //  } else{
 //    tJammingcheck.disable();
 //  }
-  //Poll sensor for new data (ToF)
-//  if (myImager.isDataReady() == true)
-//  {
-//    if (myImager.getRangingData(&measurementData)) //Read distance data into array
-//    {
-//      //The ST library returns the data transposed from zone mapping shown in datasheet
-//      //Pretty-print data with increasing y, decreasing x to reflect reality
-//      for (int y = 0 ; y <= imageWidth * (imageWidth - 1) ; y += imageWidth)
-//      {
-//        for (int x = imageWidth - 1 ; x >= 0 ; x--)
-//        {
-//          Serial.print("\t");
-//          Serial.print(measurementData.distance_mm[x + y]);
-//        }
-//        Serial.println();
-//      }
-//      Serial.println();
-//    }
-//  }
-//  delay(5); //Small delay between polling
+
   //limit_switch = digitalRead(limit_switch_pin) == HIGH;
 //  Serial.println(limit_switch);
 //  Serial.println(State);
 //  Serial.println("Another scheduler execution cycle has oocured \n");
-}
+//}
 
 void doEncoder1A() {
   // Test transition

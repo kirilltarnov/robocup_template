@@ -69,23 +69,24 @@ void circ_buffer_add(int input[4][4]) {
  }
 }
  void average_Buffer() {
-   for (int i =0; i < 4; i++) {
-  for (int j =0; j < 4; j++) {
-    averageinput[i][j] = 0;
-  }
- }
- for (int i =0; i < 4; i++) {
-  for (int j =0; j < 4; j++) {
-    for (int z =0; z <10; z++) {
-      averageinput[i][j] = buffer1[i][j][z] + averageinput[i][j];
+  for (int i =0; i < 4; i++) {
+    for (int j =0; j < 4; j++) {
+      averageinput[i][j] = 0;
+    }
+  }  
+  for (int i =0; i < 4; i++) {
+    for (int j =0; j < 4; j++) {
+      for (int z =0; z <10; z++) {
+        averageinput[i][j] = buffer1[i][j][z] + averageinput[i][j];
+      }
     }
   }
-  }
   for (int i =0; i < 4; i++) {
-  for (int j =0; j < 4; j++) {
-    averageinput[i][j] = averageinput[i][j]/10;
+    for (int j =0; j < 4; j++) {
+
+      averageinput[i][j] = (round(averageinput[i][j]/100))*10;
+    }
   }
- }
  }
 
 
