@@ -119,6 +119,7 @@ void sensor_average(/* Parameters */){
   weight_right = false;
   weight_middle = false;
   weight_found = false;
+  pole_ramp_found = false;
 
   //Poll sensor for new data (ToF)
  if (myImager.isDataReady() == true)
@@ -132,7 +133,7 @@ void sensor_average(/* Parameters */){
      {
        for (int x = imageWidth - 3 ; x >= 0 ; x--)
        {
-        Serial.print("\t");
+        //Serial.print("\t");
         // take the raw data from the VL sensor, round it to a number of 10
         //  measurement_rounded = measurementData.distance_mm[x+y]/10;
         //  measurement_rounded = round(measurement_rounded)*10;
@@ -169,11 +170,11 @@ void sensor_average(/* Parameters */){
           VL53_weighted_matrix[y/imageWidth][x] = VL53_raw_matrix[y/imageWidth][x] * 1;
         } 
 
-        Serial.print(VL53_raw_matrix[y/imageWidth][x]);    
+        //Serial.print(VL53_raw_matrix[y/imageWidth][x]);    
         }
-        Serial.println();
+        //Serial.println();
       }
-      Serial.println();
+      //Serial.println();
     }   
  }
 
@@ -193,8 +194,10 @@ void sensor_average(/* Parameters */){
     //Then something is in the FoV
     if (raw_sum < -250) {
       pole_ramp_found = true; 
+      Serial.println("pole ramp found");
     } else {
       weight_found = true; 
+      Serial.println("weight found");
     }
   }
   

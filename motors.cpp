@@ -29,9 +29,18 @@ void check_speed_limits(/*parameters*/) {
 
 void DC_motors() {
 
-   if(io.digitalRead(15) == 1){
+  if(io.digitalRead(15) == 1){
     can_trigger = false;
   }
+  //monitoring
+  Serial.print("Navigation State: ");
+  Serial.print(Navigation_State);
+  Serial.print(" Left encoder: ");
+  Serial.print(Encoder_Left);
+  Serial.print(" Right encoder: ");
+  Serial.print(Encoder_Right);
+  Serial.print(" Turning angle: ");
+  Serial.println(turn_angle);
 
   switch (Navigation_State) {
     case No_move:
@@ -41,49 +50,63 @@ void DC_motors() {
       break;
       
     case Moveforward:
-
-    if (weight_found) {
-        right_motor.writeMicroseconds(1500);
-        left_motor.writeMicroseconds(1500);
-        Navigation_State = No_move;
-    } else {
-              right_motor.writeMicroseconds(1950);
-        left_motor.writeMicroseconds(1050);
-    }
-//        right_motor.writeMicroseconds(1950);
-//        left_motor.writeMicroseconds(1950);
-//      if (Left_sensor > 550 || Right_sensor > 550 /* || pole_ramp_middle*/){
-//        Navigation_State = MoveBackward;
-//        Encoder_Left = 0; //reset encoder values 
-//        Encoder_Right = 0;
-//        turn_angle = random(3000,9000); // determine turn angle
-//      }
-//      if (weight_left || pole_ramp_right) {
-//        Navigation_State = No_move;
-//         right_motor.writeMicroseconds(1950);
-//         left_motor.writeMicroseconds(1800);
-//      } else if (weight_right || pole_ramp_left){
-//        Navigation_State = No_move;
-//         right_motor.writeMicroseconds(1800);
-//         left_motor.writeMicroseconds(1950);
-//      } else {
-//        right_motor.writeMicroseconds(1950);
-//        left_motor.writeMicroseconds(1950);
-//      }
+    // if (weight_found) {
+    //     right_motor.writeMicroseconds(1500);
+    //     left_motor.writeMicroseconds(1500);
+    //     Navigation_State = No_move;
+    // } else {
+    //     right_motor.writeMicroseconds(1950);
+    //     left_motor.writeMicroseconds(1050);
+    // }
+      right_motor.writeMicroseconds(1950);
+      left_motor.writeMicroseconds(1950);
+      //Checking if there is an obstruction to the left of the robot, turn right
+      if ((Left_sensor > 550 && Right_sensor < 550) || pole_ramp_left){
+        Navigation_State = TurnRight;
+        Encoder_Left = 0; //reset encoder values 
+        Encoder_Right = 0;
+        turn_angle = random(2000,6000); // determine turn angle
+      } else if ((Left_sensor < 550 && Right_sensor > 550) || pole_ramp_right) {
+        //Checking if there is an obstruction to the right of the robot, turn left
+        Navigation_State = TurnLeft;
+        Encoder_Left = 0; //reset encoder values 
+        Encoder_Right = 0;
+        turn_angle = random(2000,6000); // determine turn angle
+      } else if ((Left_sensor > 550 && Right_sensor > 550) || pole_ramp_middle) {
+        //Checking if there is an obstruction straight ahead, move back and turn
+        Navigation_State = MoveBackward;
+        Encoder_Left = 0; //reset encoder values 
+        Encoder_Right = 0;
+        turn_angle = random(3000,6000); // determine turn angle
+      } else {
+        right_motor.writeMicroseconds(1950);
+        left_motor.writeMicroseconds(1950);
+      }
+      // if (/*weight_left || */pole_ramp_right) {
+      //   //Navigation_State = No_move;
+      //   right_motor.writeMicroseconds(1950);
+      //   left_motor.writeMicroseconds(1700);
+      // } else if (/*weight_right ||*/ pole_ramp_left){
+      //   //Navigation_State = No_move;
+      //   right_motor.writeMicroseconds(1800);
+      //   left_motor.writeMicroseconds(1950);
+      // }
       break;
+
     case MoveBackward:
         right_motor.writeMicroseconds(1050);
         left_motor.writeMicroseconds(1050);
       if ((Encoder_Left < -400 && Encoder_Right < -400)) {
         if (turn_angle > 6000){
-          Navigation_State = 4;
+          Navigation_State = TurnLeft;
         } else {
-          Navigation_State = 3;
+          Navigation_State = TurnRight;
         }
         Encoder_Left = 0;
         Encoder_Right = 0;
       }
       break;
+
     case TurnRight:
       right_motor.writeMicroseconds(1050);
       left_motor.writeMicroseconds(1950);
@@ -91,11 +114,15 @@ void DC_motors() {
         Navigation_State = Moveforward;
       }
       break;
+
     case TurnLeft:
       right_motor.writeMicroseconds(1950);
       left_motor.writeMicroseconds(1050);
-      if(Encoder_Left < -(12000 - turn_angle) && Encoder_Right > (12000 - turn_angle)) {
-        Navigation_State = 1;
+      // if(Encoder_Left < -(12000 - turn_angle) && Encoder_Right > (12000 - turn_angle)) {
+      //   Navigation_State = Moveforward;
+      // }
+      if (Encoder_Left < turn_angle && Encoder_Right > -turn_angle) {
+        Navigation_State = Moveforward;
       }
       break;
 

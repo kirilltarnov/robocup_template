@@ -332,6 +332,11 @@ void loop() {
   //Joystick for testing only
   joystick_x_pos = analogRead(JOYSTICK_PIN);
   joystick_map_x = map(joystick_x_pos, 0, 950, 1050, 1950);
+
+  // Serial.print("Left sensor: ");
+  // Serial.println(Left_sensor);
+  // Serial.print("Right sensor: ");
+  // Serial.println(Right_sensor);
   // if (set_thresh_enable == 0) {
   //   Serial.println("VL sensor threshold ENABLED");
   // }
