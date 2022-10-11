@@ -35,21 +35,46 @@ void DC_motors() {
 
   switch (Navigation_State) {
     case No_move:
-        if (can_trigger == false) {
+        if (io.digitalRead(15) == 1) {
           Navigation_State = Moveforward;
         }
       break;
+      
     case Moveforward:
-      if (Left_sensor > 550 || Right_sensor > 550 ) {
-        Navigation_State = MoveBackward;
-        Encoder_Left = 0; //reset encoder values 
-        Encoder_Right = 0;
 
-        turn_angle = random(3000,9000); // determine turn angle
-      }
+    if (weight_found) {
+        right_motor.writeMicroseconds(1500);
+        left_motor.writeMicroseconds(1500);
+        Navigation_State = No_move;
+    } else {
+              right_motor.writeMicroseconds(1950);
+        left_motor.writeMicroseconds(1050);
+    }
+//        right_motor.writeMicroseconds(1950);
+//        left_motor.writeMicroseconds(1950);
+//      if (Left_sensor > 550 || Right_sensor > 550 /* || pole_ramp_middle*/){
+//        Navigation_State = MoveBackward;
+//        Encoder_Left = 0; //reset encoder values 
+//        Encoder_Right = 0;
+//        turn_angle = random(3000,9000); // determine turn angle
+//      }
+//      if (weight_left || pole_ramp_right) {
+//        Navigation_State = No_move;
+//         right_motor.writeMicroseconds(1950);
+//         left_motor.writeMicroseconds(1800);
+//      } else if (weight_right || pole_ramp_left){
+//        Navigation_State = No_move;
+//         right_motor.writeMicroseconds(1800);
+//         left_motor.writeMicroseconds(1950);
+//      } else {
+//        right_motor.writeMicroseconds(1950);
+//        left_motor.writeMicroseconds(1950);
+//      }
       break;
     case MoveBackward:
-      if ((Encoder_Left < -500 && Encoder_Right < -500)) {
+        right_motor.writeMicroseconds(1050);
+        left_motor.writeMicroseconds(1050);
+      if ((Encoder_Left < -400 && Encoder_Right < -400)) {
         if (turn_angle > 6000){
           Navigation_State = 4;
         } else {
@@ -60,15 +85,21 @@ void DC_motors() {
       }
       break;
     case TurnRight:
+      right_motor.writeMicroseconds(1050);
+      left_motor.writeMicroseconds(1950);
       if (Encoder_Left > turn_angle && Encoder_Right < -turn_angle) {
         Navigation_State = Moveforward;
       }
       break;
     case TurnLeft:
+      right_motor.writeMicroseconds(1950);
+      left_motor.writeMicroseconds(1050);
       if(Encoder_Left < -(12000 - turn_angle) && Encoder_Right > (12000 - turn_angle)) {
         Navigation_State = 1;
       }
-    break;
+      break;
+
+      
   }
       
   switch(pickup_state) {
@@ -101,8 +132,7 @@ void DC_motors() {
   }
 
 //  if(Navigation_State == 1){
-//    right_motor.writeMicroseconds(1950);
-//    left_motor.writeMicroseconds(1950);
+
 //  }else if (Navigation_State == 2) {
 //    right_motor.writeMicroseconds(1050);
 //    left_motor.writeMicroseconds(1050);
