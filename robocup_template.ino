@@ -30,6 +30,7 @@
 #include "return_to_base.h"
 
 
+
 //**********************************************************************************
 // Local Definitions
 //**********************************************************************************
@@ -150,6 +151,12 @@ bool pole_ramp_found = false;
 double weighted_sum = 0;
 double raw_sum = 0;
 double residual = 0;
+bool pole_ramp_middle = false;
+bool pole_ramp_left = false;
+bool pole_ramp_right = false;
+bool weight_left = false;
+bool weight_right = false;
+bool weight_middle = false;
 
 
 Servo right_motor;
@@ -248,9 +255,6 @@ void pin_init() {
   attachInterrupt(digitalPinToInterrupt(encoder2PinA), doEncoder2A, CHANGE);
   attachInterrupt(digitalPinToInterrupt(encoder3PinA), doEncoder3A, CHANGE);
 
-  //attachInterrupt(digitalPinToInterrupt(encoder1PinA), doEncoder1A, CHANGE);  //Set up an interrupt for each encoder
-  //attachInterrupt(digitalPinToInterrupt(encoder2PinA), doEncoder2A, CHANGE);
-  //attachInterrupt(digitalPinToInterrupt(encoder3PinA), doEncoder3A, CHANGE);
   right_motor.attach(encoder2serialpin);
   left_motor.attach(encoder1serialpin);
   //Gate_servo.attach(7);
@@ -388,37 +392,6 @@ void loop() {
   // weight_found = io.digitalRead(SX1509_AIO0); 
   // Serial.println(weight_found);
 
- //Poll sensor for new data (ToF)
-  
-// if (myImager.isDataReady() == true)
-// {
-//   if (myImager.getRangingData(&measurementData)) //Read distance data into array
-//   {
-//      
-//     //The ST library returns the data transposed from zone mapping shown in datasheet
-//     //Pretty-print data with increasing y, decreasing x to reflect reality
-//     for (int y = 0 ; y <= imageWidth * (imageWidth - 1) ; y += imageWidth)
-//     {
-//       for (int x = imageWidth - 1 ; x >= 0 ; x--)
-//       {
-//         Serial.print("\t");
-//         measurement_rounded = measurementData.distance_mm[x+y]/10;
-//         measurement_rounded = round(measurement_rounded)*10;
-//         measurement_rounded = int(measurement_rounded); //convert from double to int
-//         measurement_old[y][x] = measurement_rounded; //place rounded data in a 
-//        //  Serial.print(measurement_old);
-//        //  if (abs(measurement_rounded-measurement_old) > DISTANCE_CHANGE) {
-//        //     Serial.print("Weight Found");
-//        //  }
-//        
-//       }
-//       Serial.println();
-//     }
-//     Serial.println();
-//   }
-// }
-// delay(5); //Small delay between polling
-
 
   // set old column and row sums
   // for (int i = 0; i < 5; i++) {
@@ -427,7 +400,12 @@ void loop() {
   // for (int j = 0; j < 7; j++) {
   //   row_sum_old[j] = row_sum[j];
   // }
-
+  pole_ramp_middle = false;
+  pole_ramp_left = false;
+  pole_ramp_right = false;
+  weight_left = false;
+  weight_right = false;
+  weight_middle = false;
 
   //Poll sensor for new data (ToF)
  if (myImager.isDataReady() == true)
@@ -497,10 +475,40 @@ void loop() {
     }
   }
 
-  //Find residual
-  residual = 0;
+  //Use raw sums to distinguish between weights and poles/ramps
+  if (raw_sum < 0) {
+    //Then something is in the FoV
+    if (raw_sum < -250) {
+      pole_ramp_found = true; 
+    } else {
+      weight_found = true; 
+    }
+  }
+  
+  //Use residual value to determine if the object is in the middle, left or right
   residual = weighted_sum/raw_sum; 
-  Serial.println(weighted_sum);
+  if (weight_found) {
+    if ((residual > 0.5) && (residual < 1.5)) {
+      weight_right = true;
+    } else if ((residual < -0.5) && (residual > -1.5)) {
+      weight_left = true;
+    } else  if ((residual > -0.5) && (residual < 0.5)){
+      weight_middle = true;
+    }
+  }
+
+  if (pole_ramp_found) {
+    if ((residual > 0.5) && (residual < 1.5)) {
+      pole_ramp_right = true;
+    } else if ((residual < -0.5) && (residual > -1.5)) {
+      pole_ramp_left = true;
+    } else if ((residual > -0.5) && (residual < 0.5)){
+      pole_ramp_middle = true;
+    }
+  }
+
+  
+  //Serial.println(raw_sum);
   // filter the data from the VL53 sensor
   // circ_buffer_add(VL53_raw_matrix);
   // average_Buffer();
