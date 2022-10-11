@@ -15,7 +15,7 @@ extern int low_right_sensor;
 extern int Encoder_Right;
 extern int Encoder_Left;
 extern int encoder_pickup;
-extern int limit_switch;
+extern int limit_switch_inner;
 extern boolean weight_found;
 
 extern bool limit_switch_outer;

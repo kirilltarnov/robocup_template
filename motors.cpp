@@ -4,12 +4,13 @@
 #include "sensors.h"
 bool pickup_calibration_complete = false;
 bool can_trigger = true;
-int timer = 0;
+int search_timer = 0;
 bool thing = true;
 int pickup_state = 0;
 int Navigation_State = 0;
 int turn_angle = 0;
 int limit_switch_inner;
+int jam_timer = 0;
 uint8_t pick_up_counter = 0;
 /* Check whether the speed value to be written is within the maximum
  *  and minimum speed caps. Act accordingly.
@@ -51,14 +52,6 @@ void DC_motors() {
       break;
       
     case Moveforward:
-    // if (weight_found) {
-    //     right_motor.writeMicroseconds(1500);
-    //     left_motor.writeMicroseconds(1500);
-    //     Navigation_State = No_move;
-    // } else {
-    //     right_motor.writeMicroseconds(1950);
-    //     left_motor.writeMicroseconds(1050);
-    // }
       right_motor.writeMicroseconds(1950);
       left_motor.writeMicroseconds(1950);
       //Checking if there is an obstruction to the left of the robot, turn right
@@ -83,15 +76,7 @@ void DC_motors() {
         right_motor.writeMicroseconds(1950);
         left_motor.writeMicroseconds(1950);
       }
-      // if (/*weight_left || */pole_ramp_right) {
-      //   //Navigation_State = No_move;
-      //   right_motor.writeMicroseconds(1950);
-      //   left_motor.writeMicroseconds(1700);
-      // } else if (/*weight_right ||*/ pole_ramp_left){
-      //   //Navigation_State = No_move;
-      //   right_motor.writeMicroseconds(1800);
-      //   left_motor.writeMicroseconds(1950);
-      // }
+
       break;
 
     case MoveBackward:
@@ -130,10 +115,7 @@ void DC_motors() {
       
   }
 
-  if (limit_switch_outer == 1) {
-    pick_up_counter += 1;
-  }
-      
+      Serial.print(pickup_state);
   switch(pickup_state) {
     case 0:
     //Use joystick before Start PB is pressed
@@ -141,6 +123,7 @@ void DC_motors() {
       if (can_trigger == false) {
         pickup_state = 1;
       }
+      
       break;
     //Move outward
     case 1:
@@ -155,16 +138,22 @@ void DC_motors() {
     case 2:
       if (low_right_sensor > 350) {
         if (pick_up_counter > 4) {
-          pickup_state = 3;
+          pickup_state = 1;
         } else {
           pickup_motor.writeMicroseconds(1950);
           pickup_state = 3;
+          jam_timer = 0;
         }
 
       }
       break;
     case 3:
+      if (jam_timer > 90) {
+        pickup_state = 1;
+      }
+      jam_timer += 1;
       if (limit_switch_inner == HIGH) {
+        pick_up_counter += 1;
         pickup_state = 1;
         can_trigger = true;
     }   
