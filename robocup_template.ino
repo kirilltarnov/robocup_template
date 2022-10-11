@@ -61,7 +61,7 @@ const byte SX1509_AIO15 = 15;
 #define IR_READ_TASK_PERIOD                 40
 #define COLOUR_READ_TASK_PERIOD             40
 #define SENSOR_AVERAGE_PERIOD               40
-#define read_limit_TASK_PERIOD            0
+#define read_limit_TASK_PERIOD            40
 #define SET_MOTOR_TASK_PERIOD               40
 #define WEIGHT_SCAN_TASK_PERIOD             40
 #define COLLECT_WEIGHT_TASK_PERIOD          40
@@ -80,8 +80,8 @@ const byte SX1509_AIO15 = 15;
 #define US_READ_TASK_NUM_EXECUTE           0
 #define IR_READ_TASK_NUM_EXECUTE           -1
 #define COLOUR_READ_TASK_NUM_EXECUTE       0
-#define read_limit_TASK_NUM_EXECUTE      0
-#define SENSOR_AVERAGE_NUM_EXECUTE         0
+#define read_limit_TASK_NUM_EXECUTE      -1
+#define SENSOR_AVERAGE_NUM_EXECUTE         -1
 #define SET_MOTOR_TASK_NUM_EXECUTE         -1
 #define WEIGHT_SCAN_TASK_NUM_EXECUTE       -1
 #define COLLECT_WEIGHT_TASK_NUM_EXECUTE    0
@@ -104,6 +104,7 @@ const byte SX1509_AIO15 = 15;
 #define encoder2serialpin 1
 #define encoder3serialpin 7
 #define limit_switch_pin 20
+#define limit_switch2_pin 14
 #define JOYSTICK_PIN 27
 
 //VL53L5CX object detection set-up
@@ -144,7 +145,7 @@ int Right_sensor;
 int Left_sensor;
 void infra_red_callback();
 
-SparkFun_VL53L5CX myImager;
+//SparkFun_VL53L5CX myImager;
 VL53L5CX_ResultsData measurementData; // Result data class structure, 1356 byes of RAM
 VL53L5CX_DetectionThresholds detectionThresholds;
 
@@ -224,6 +225,7 @@ void pin_init() {
   pinMode(encoder3PinA, INPUT);
   pinMode(encoder3PinB, INPUT);
   pinMode(limit_switch_pin, INPUT);
+  pinMode(limit_switch2_pin, INPUT);
   attachInterrupt(digitalPinToInterrupt(encoder1PinA), doEncoder1A, CHANGE);  //Set up an interrupt for each encoder
   attachInterrupt(digitalPinToInterrupt(encoder2PinA), doEncoder2A, CHANGE);
   attachInterrupt(digitalPinToInterrupt(encoder3PinA), doEncoder3A, CHANGE);
@@ -256,20 +258,20 @@ void pin_init() {
   io.pinMode(SX1509_AIO15, INPUT);
 
   Serial.println("Initializing sensor board. This can take up to 10s. Please wait.");
-  if (myImager.begin() == false)
-  {
-    Serial.println(F("Sensor not found - check your wiring. Freezing"));
-    while (1) ;
-  }
-
-  myImager.setResolution(4 * 4); //Enable all 64 pads
-
-  imageResolution = myImager.getResolution(); //Query sensor for current resolution - either 4x4 or 8x8
-  imageWidth = sqrt(imageResolution); //Calculate printing width
-  myImager.setRangingMode(SF_VL53L5CX_RANGING_MODE::CONTINUOUS); //Change to continuous to get data in constantly
-  myImager.setSharpenerPercent(100); //Set sharpener percentage to avoid edges of objects being in adjacent zones
-  myImager.setTargetOrder(SF_VL53L5CX_TARGET_ORDER::CLOSEST);
-  myImager.startRanging();
+//  if (myImager.begin() == false)
+//  {
+//    Serial.println(F("Sensor not found - check your wiring. Freezing"));
+//    while (1) ;
+//  }
+//
+//  myImager.setResolution(4 * 4); //Enable all 64 pads
+//
+//  imageResolution = myImager.getResolution(); //Query sensor for current resolution - either 4x4 or 8x8
+//  imageWidth = sqrt(imageResolution); //Calculate printing width
+//  myImager.setRangingMode(SF_VL53L5CX_RANGING_MODE::CONTINUOUS); //Change to continuous to get data in constantly
+//  myImager.setSharpenerPercent(100); //Set sharpener percentage to avoid edges of objects being in adjacent zones
+//  myImager.setTargetOrder(SF_VL53L5CX_TARGET_ORDER::CLOSEST);
+//  myImager.startRanging();
 
 //  Serial.println("Initializing sensor board. This can take up to 10s. Please wait.");
 //  if (myImager.begin() == false)
@@ -331,14 +333,14 @@ void task_init() {
 
   //enable the tasks
   //  tRead_ultrasonic.enable();
-  // tRead_infrared.enable();
+   tRead_infrared.enable();
   // tread_encoder.enable();
   //  tRead_colour.enable();
   //  tSensor_average.enable();
-  // tread_limit.enable();
-  // tSet_motor.enable();
-  // tWeight_scan.enable();
-  //  tCollect_weight.enable();
+   tread_limit.enable();
+   tSet_motor.enable();
+   tWeight_scan.enable();
+    tCollect_weight.enable();
   //  tReturn_to_base.enable();
   //  tDetect_base.enable();
   //  tUnload_weights.enable();
@@ -369,34 +371,34 @@ void loop() {
   // Serial.println(weight_found);
  //Poll sensor for new data (ToF)
   
- if (myImager.isDataReady() == true)
- {
-   if (myImager.getRangingData(&measurementData)) //Read distance data into array
-   {
-      
-     //The ST library returns the data transposed from zone mapping shown in datasheet
-     //Pretty-print data with increasing y, decreasing x to reflect reality
-     for (int y = 0 ; y <= imageWidth * (imageWidth - 1) ; y += imageWidth)
-     {
-       for (int x = imageWidth - 1 ; x >= 0 ; x--)
-       {
-         Serial.print("\t");
-         measurement_rounded = measurementData.distance_mm[x+y]/10;
-         measurement_rounded = round(measurement_rounded)*10;
-         measurement_rounded = int(measurement_rounded); //convert from double to int
-         measurement_old[y][x] = measurement_rounded; //place rounded data in a 
-        //  Serial.print(measurement_old);
-        //  if (abs(measurement_rounded-measurement_old) > DISTANCE_CHANGE) {
-        //     Serial.print("Weight Found");
-        //  }
-        
-       }
-       Serial.println();
-     }
-     Serial.println();
-   }
- }
- delay(5); //Small delay between polling
+// if (myImager.isDataReady() == true)
+// {
+//   if (myImager.getRangingData(&measurementData)) //Read distance data into array
+//   {
+//      
+//     //The ST library returns the data transposed from zone mapping shown in datasheet
+//     //Pretty-print data with increasing y, decreasing x to reflect reality
+//     for (int y = 0 ; y <= imageWidth * (imageWidth - 1) ; y += imageWidth)
+//     {
+//       for (int x = imageWidth - 1 ; x >= 0 ; x--)
+//       {
+//         Serial.print("\t");
+//         measurement_rounded = measurementData.distance_mm[x+y]/10;
+//         measurement_rounded = round(measurement_rounded)*10;
+//         measurement_rounded = int(measurement_rounded); //convert from double to int
+//         measurement_old[y][x] = measurement_rounded; //place rounded data in a 
+//        //  Serial.print(measurement_old);
+//        //  if (abs(measurement_rounded-measurement_old) > DISTANCE_CHANGE) {
+//        //     Serial.print("Weight Found");
+//        //  }
+//        
+//       }
+//       Serial.println();
+//     }
+//     Serial.println();
+//   }
+// }
+// delay(5); //Small delay between polling
  
 
 //  if (pickup_mechanism == WEIGHT_FOUND) {

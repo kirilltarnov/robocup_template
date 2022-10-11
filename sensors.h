@@ -15,6 +15,7 @@ extern int Encoder_Right;
 extern int Encoder_Left;
 extern int encoder_pickup;
 extern int limit_switch;
+extern bool limit_switch2;
 
 
 

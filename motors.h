@@ -9,7 +9,7 @@
 #define MIN_SPEED_CAP 1          //Set the minimum speed value that can be written to the motors
 #define MAX_SPEED_CAP 1           //Set the maximum speed value that can be written to the motors
 #define PICKUP_CAL_SPEED 1950
-#define PICKUP_REV_SPEED 1150
+#define PICKUP_REV_SPEED 1050
 #define PICKUP_FOR_SPEED 1900
 #define PICKUP_ENCODER_DIST_OUT 1320
 #define PICKUP_ENCODER_DIST_IN 500
@@ -23,6 +23,7 @@ extern int encoder_pickup;
 extern int limit_switch;
 extern bool pickup_calibration_complete;
 extern int joystick_map_x;
+extern bool can_trigger;
 
 void check_speed_limits(/*parameters*/);
 void DC_motors();

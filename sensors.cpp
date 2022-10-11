@@ -14,6 +14,7 @@
 #define encoder1PinB 3
 #define encoder2PinA 4
 #define encoder2PinB 5
+bool limit_switch2;
 int low_right_sensor;
 // Read ultrasonic value
 void read_ultrasonic(/* Parameters */){
@@ -41,7 +42,8 @@ void read_colour(/* Parameters */){
 }
 
 void read_limit() {
-    limit_switch = digitalRead(20) == HIGH;
+    limit_switch = digitalRead(20);
+    limit_switch2 = digitalRead(14);
 }
 
 int buffer1[4][4][10];

@@ -1,9 +1,12 @@
 #include "motors.h"
 #include "Arduino.h"
 #include "weight_collection.h"
-
+#include "sensors.h"
 bool pickup_calibration_complete = false;
 bool can_trigger = true;
+int timer = 0;
+bool thing = true;
+int pickup_state = 0;
 /* Check whether the speed value to be written is within the maximum
  *  and minimum speed caps. Act accordingly.
  *
@@ -23,7 +26,7 @@ void check_speed_limits(/*parameters*/) {
 
 void DC_motors() {
   //Pick-up motor using a joystick for testing
-  pickup_motor.writeMicroseconds(joystick_map_x);
+  
 //  if(pickup_mechanism == 0){
 //    pickup_motor.writeMicroseconds(1500);
 //  } else if(pickup_mechanism == 1) {
@@ -36,7 +39,66 @@ void DC_motors() {
 //   if(pickup_mechanism == 1 && can_trigger == true) {
 //     pickup_calibration_complete = false;
 //   }
-//  
+ // timer = timer + 1;
+//  if (pickup_calibration_complete == false) {
+//    pickup_motor.writeMicroseconds(PICKUP_REV_SPEED);
+//    if (limit_switch == 1) {
+//      pickup_calibration_complete = true;
+//    }
+//  } else if ((low_right_sensor > 350 && can_trigger == true;) {
+//    pickup_motor.writeMicroseconds(PICKUP_CAL_SPEED);
+//    timer = 0;
+//    can_trigger = false;
+//  } else if (can_trigger == false && timer > 25) {
+//    pickup_motor.writeMicroseconds(1500);
+//  }
+
+Serial.print(pickup_state);
+switch(pickup_state) {
+  case 0:
+    pickup_motor.writeMicroseconds(joystick_map_x);
+    if (can_trigger == false) {
+      pickup_state = 1;
+    }
+    break;
+  case 1:
+    if(limit_switch2 == 0) {
+      pickup_motor.writeMicroseconds(1050);
+    } else {
+      pickup_motor.writeMicroseconds(1500);
+      pickup_state = 2;
+    }
+    break;
+  case 2:
+    if (low_right_sensor > 350) {
+      pickup_motor.writeMicroseconds(1950);
+      pickup_state = 3;
+    }
+    break;
+  case 3:
+    if (limit_switch == HIGH) {
+      pickup_state = 1;
+      can_trigger = true;
+  }
+  
+}
+
+
+
+
+
+
+//if (thing == false) {
+//  timer = timer + 1;
+//}
+//Serial.println(timer);
+//if (thing == false && timer > 30) {
+//  pickup_motor.writeMicroseconds(1500);
+//  thing = true;
+//  timer = 0;
+//}
+
+
 //  if (pickup_calibration_complete == false) {
 //    can_trigger = false;
 //    pickup_motor.writeMicroseconds(PICKUP_CAL_SPEED);
