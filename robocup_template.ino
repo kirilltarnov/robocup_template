@@ -169,7 +169,7 @@ int Right_sensor;
 int Left_sensor;
 void infra_red_callback();
 
-//SparkFun_VL53L5CX myImager;
+SparkFun_VL53L5CX myImager;
 VL53L5CX_ResultsData measurementData; // Result data class structure, 1356 byes of RAM
 VL53L5CX_DetectionThresholds detectionThresholds;
 
@@ -249,16 +249,10 @@ void pin_init() {
   pinMode(encoder3PinA, INPUT);
   pinMode(encoder3PinB, INPUT);
   pinMode(limit_switch_pin, INPUT);
-<<<<<<< HEAD
   pinMode(limit_switch2_pin, INPUT);
   attachInterrupt(digitalPinToInterrupt(encoder1PinA), doEncoder1A, CHANGE);  //Set up an interrupt for each encoder
   attachInterrupt(digitalPinToInterrupt(encoder2PinA), doEncoder2A, CHANGE);
   attachInterrupt(digitalPinToInterrupt(encoder3PinA), doEncoder3A, CHANGE);
-=======
-  //attachInterrupt(digitalPinToInterrupt(encoder1PinA), doEncoder1A, CHANGE);  //Set up an interrupt for each encoder
-  //attachInterrupt(digitalPinToInterrupt(encoder2PinA), doEncoder2A, CHANGE);
-  //attachInterrupt(digitalPinToInterrupt(encoder3PinA), doEncoder3A, CHANGE);
->>>>>>> 326ea380b5da39bd2540076e1038ed9950ab05c0
   right_motor.attach(encoder2serialpin);
   left_motor.attach(encoder1serialpin);
   //Gate_servo.attach(7);
@@ -401,38 +395,6 @@ void loop() {
   // }
   // weight_found = io.digitalRead(SX1509_AIO0); 
   // Serial.println(weight_found);
-<<<<<<< HEAD
- //Poll sensor for new data (ToF)
-  
-// if (myImager.isDataReady() == true)
-// {
-//   if (myImager.getRangingData(&measurementData)) //Read distance data into array
-//   {
-//      
-//     //The ST library returns the data transposed from zone mapping shown in datasheet
-//     //Pretty-print data with increasing y, decreasing x to reflect reality
-//     for (int y = 0 ; y <= imageWidth * (imageWidth - 1) ; y += imageWidth)
-//     {
-//       for (int x = imageWidth - 1 ; x >= 0 ; x--)
-//       {
-//         Serial.print("\t");
-//         measurement_rounded = measurementData.distance_mm[x+y]/10;
-//         measurement_rounded = round(measurement_rounded)*10;
-//         measurement_rounded = int(measurement_rounded); //convert from double to int
-//         measurement_old[y][x] = measurement_rounded; //place rounded data in a 
-//        //  Serial.print(measurement_old);
-//        //  if (abs(measurement_rounded-measurement_old) > DISTANCE_CHANGE) {
-//        //     Serial.print("Weight Found");
-//        //  }
-//        
-//       }
-//       Serial.println();
-//     }
-//     Serial.println();
-//   }
-// }
-// delay(5); //Small delay between polling
-=======
 
   // set old column and row sums
   // for (int i = 0; i < 5; i++) {
@@ -504,7 +466,6 @@ void loop() {
       //Serial.println();
     }   
  }
->>>>>>> 326ea380b5da39bd2540076e1038ed9950ab05c0
  
   //Sum weighted and raw matrices
   weighted_sum = 0;
@@ -529,21 +490,21 @@ void loop() {
   //Use residual value to determine if the object is in the middle, left or right
   residual = weighted_sum/raw_sum; 
   if (weight_found) {
-    if ((residual > 0.5) & (residual < 1.5)) {
+    if ((residual > 0.5) && (residual < 1.5)) {
       weight_right = true;
-    } else if ((residual < -0.5) & (residual > -1.5)) {
+    } else if ((residual < -0.5) && (residual > -1.5)) {
       weight_left = true;
-    } else {
+    } else  if ((residual > -0.5) && (residual < 0.5)){
       weight_middle = true;
     }
   }
 
   if (pole_ramp_found) {
-    if ((residual > 0.5) & (residual < 1.5)) {
+    if ((residual > 0.5) && (residual < 1.5)) {
       pole_ramp_right = true;
-    } else if ((residual < -0.5) & (residual > -1.5)) {
+    } else if ((residual < -0.5) && (residual > -1.5)) {
       pole_ramp_left = true;
-    } else {
+    } else if ((residual > -0.5) && (residual < 0.5)){
       pole_ramp_middle = true;
     }
   }
