@@ -15,10 +15,14 @@ extern int Encoder_Right;
 extern int Encoder_Left;
 extern int encoder_pickup;
 extern int limit_switch;
+
+extern bool limit_switch2;
+
 extern int buffer1[4][4][10];
 extern int averageinput[4][4];
 extern int head;
 extern int tail;
+
 
 
 

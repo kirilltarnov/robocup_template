@@ -18,7 +18,10 @@ int pickup_mechanism = No_weight;
 int limit_switch;
 void State_machine()
 {
-
+  if(io.digitalRead(15) == 1){
+    can_trigger = false;
+    Serial.println(1);
+  }
     //Serial.print(io.digitalRead(15));
 //  switch(Overall_State) {
 //    case Startup:
@@ -91,7 +94,7 @@ void State_machine()
 //      break;
 //    
 //}
-  Serial.println(pickup_mechanism);
+  //Serial.println(pickup_mechanism);
 
 //  Serial.print("Left_Encoder:");
 //  Serial.print(Encoder_Left);
