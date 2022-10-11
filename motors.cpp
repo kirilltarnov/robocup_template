@@ -119,7 +119,7 @@ void DC_motors() {
   switch(pickup_state) {
     case 0:
     //Use joystick before Start PB is pressed
-      //pickup_motor.writeMicroseconds(joystick_map_x);
+      pickup_motor.writeMicroseconds(joystick_map_x);
       if (can_trigger == false) {
         pickup_state = 1;
       }
