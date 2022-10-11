@@ -30,6 +30,7 @@
 #include "return_to_base.h"
 
 
+
 //**********************************************************************************
 // Local Definitions
 //**********************************************************************************
@@ -149,6 +150,12 @@ bool pole_ramp_found = false;
 double weighted_sum = 0;
 double raw_sum = 0;
 double residual = 0;
+bool pole_ramp_middle = false;
+bool pole_ramp_left = false;
+bool pole_ramp_right = false;
+bool weight_left = false;
+bool weight_right = false;
+bool weight_middle = false;
 
 
 Servo right_motor;
@@ -392,7 +399,12 @@ void loop() {
   // for (int j = 0; j < 7; j++) {
   //   row_sum_old[j] = row_sum[j];
   // }
-
+  pole_ramp_middle = false;
+  pole_ramp_left = false;
+  pole_ramp_right = false;
+  weight_left = false;
+  weight_right = false;
+  weight_middle = false;
 
   //Poll sensor for new data (ToF)
  if (myImager.isDataReady() == true)
@@ -426,21 +438,21 @@ void loop() {
           VL53_raw_matrix[y/imageWidth][x] -= 250;
         } 
         if (y == imageWidth*7) {
-          VL53_weighted_matrix[y/imageWidth][x] = VL53_raw_matrix[y/imageWidth][x] * -2;
-        } else if (y == imageWidth*6) {
           VL53_weighted_matrix[y/imageWidth][x] = VL53_raw_matrix[y/imageWidth][x] * -1;
-        } else if (y == imageWidth*5) {
+        } else if (y == imageWidth*6) {
           VL53_weighted_matrix[y/imageWidth][x] = VL53_raw_matrix[y/imageWidth][x] * -0.5;
+        } else if (y == imageWidth*5) {
+          VL53_weighted_matrix[y/imageWidth][x] = VL53_raw_matrix[y/imageWidth][x] * -0.25;
         } else if (y == imageWidth*4) {
           VL53_weighted_matrix[y/imageWidth][x] = VL53_raw_matrix[y/imageWidth][x] * 0;
         } else if (y == imageWidth*3) {
           VL53_weighted_matrix[y/imageWidth][x] = VL53_raw_matrix[y/imageWidth][x] * 0;
         } else if (y == imageWidth*2) {
-          VL53_weighted_matrix[y/imageWidth][x] = VL53_raw_matrix[y/imageWidth][x] * 0.5;
+          VL53_weighted_matrix[y/imageWidth][x] = VL53_raw_matrix[y/imageWidth][x] * 0.25;
         } else if (y == imageWidth*1) {
-          VL53_weighted_matrix[y/imageWidth][x] = VL53_raw_matrix[y/imageWidth][x] * 1;
+          VL53_weighted_matrix[y/imageWidth][x] = VL53_raw_matrix[y/imageWidth][x] * 0.5;
         } else if (y == imageWidth*0) {
-          VL53_weighted_matrix[y/imageWidth][x] = VL53_raw_matrix[y/imageWidth][x] * 2;
+          VL53_weighted_matrix[y/imageWidth][x] = VL53_raw_matrix[y/imageWidth][x] * 1;
         } 
 
         //Serial.print(VL53_weighted_matrix[y/imageWidth][x]);    
@@ -452,7 +464,7 @@ void loop() {
  }
  
   //Sum weighted and raw matrices
-  //weighted_sum = 0;
+  weighted_sum = 0;
   raw_sum = 0;
   for (int row = 0; row <7; row++) {
     for (int col = 0; col < 5; col++) {
@@ -461,10 +473,40 @@ void loop() {
     }
   }
 
-  //Find residual
-  residual = 0;
+  //Use raw sums to distinguish between weights and poles/ramps
+  if (raw_sum < 0) {
+    //Then something is in the FoV
+    if (raw_sum < -250) {
+      pole_ramp_found = true; 
+    } else {
+      weight_found = true; 
+    }
+  }
+  
+  //Use residual value to determine if the object is in the middle, left or right
   residual = weighted_sum/raw_sum; 
-  Serial.println(weighted_sum);
+  if (weight_found) {
+    if ((residual > 0.5) & (residual < 1.5)) {
+      weight_right = true;
+    } else if ((residual < -0.5) & (residual > -1.5)) {
+      weight_left = true;
+    } else {
+      weight_middle = true;
+    }
+  }
+
+  if (pole_ramp_found) {
+    if ((residual > 0.5) & (residual < 1.5)) {
+      pole_ramp_right = true;
+    } else if ((residual < -0.5) & (residual > -1.5)) {
+      pole_ramp_left = true;
+    } else {
+      pole_ramp_middle = true;
+    }
+  }
+
+  
+  //Serial.println(raw_sum);
   // filter the data from the VL53 sensor
   // circ_buffer_add(VL53_raw_matrix);
   // average_Buffer();
