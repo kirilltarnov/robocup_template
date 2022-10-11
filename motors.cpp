@@ -55,23 +55,33 @@ void DC_motors() {
       right_motor.writeMicroseconds(1950);
       left_motor.writeMicroseconds(1950);
       //Checking if there is an obstruction to the left of the robot, turn right
-      if ((Left_sensor > 550 && Right_sensor < 550) || pole_ramp_left){
+      if (Left_sensor > 550 && Right_sensor < 550){
         Navigation_State = TurnRight;
         Encoder_Left = 0; //reset encoder values 
         Encoder_Right = 0;
-        turn_angle = random(2000,6000); // determine turn angle
-      } else if ((Left_sensor < 550 && Right_sensor > 550) || pole_ramp_right) {
+        turn_angle = random(2000,5000); // determine turn angle
+      } else if (Left_sensor < 550 && Right_sensor > 550) {
         //Checking if there is an obstruction to the right of the robot, turn left
         Navigation_State = TurnLeft;
         Encoder_Left = 0; //reset encoder values 
         Encoder_Right = 0;
-        turn_angle = random(2000,6000); // determine turn angle
+        turn_angle = random(2000,5000); // determine turn angle
       } else if ((Left_sensor > 550 && Right_sensor > 550) || pole_ramp_middle) {
         //Checking if there is an obstruction straight ahead, move back and turn
         Navigation_State = MoveBackward;
         Encoder_Left = 0; //reset encoder values 
         Encoder_Right = 0;
         turn_angle = random(3000,6000); // determine turn angle
+      } else  if (pole_ramp_left) {
+        Navigation_State = BankRight;
+        Encoder_Left = 0; //reset encoder values 
+        Encoder_Right = 0;
+        turn_angle = random(1000,3000); // determine turn angle
+      } else if (pole_ramp_right) {
+        Navigation_State = BankLeft;
+        Encoder_Left = 0; //reset encoder values 
+        Encoder_Right = 0;
+        turn_angle = random(1000,3000); // determine turn angle
       } else {
         right_motor.writeMicroseconds(1950);
         left_motor.writeMicroseconds(1950);
@@ -112,10 +122,29 @@ void DC_motors() {
       }
       break;
 
+      //Bank turns at a smaller angle compared to 'Turn'
+      case BankLeft:
+        right_motor.writeMicroseconds(1900);
+        left_motor.writeMicroseconds(1100);
+        if (Encoder_Left < turn_angle && Encoder_Right > -turn_angle) {
+          Navigation_State = Moveforward;
+        }
+        break;
+
+      case BankRight:
+        right_motor.writeMicroseconds(1100);
+        left_motor.writeMicroseconds(1900);
+        if (Encoder_Left < turn_angle && Encoder_Right > -turn_angle) {
+          Navigation_State = Moveforward;
+        }
+        break;
+
+
+
       
   }
 
-      Serial.print(pickup_state);
+  //Serial.print(pickup_state);
   switch(pickup_state) {
     case 0:
     //Use joystick before Start PB is pressed

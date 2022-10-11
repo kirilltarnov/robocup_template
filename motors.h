@@ -21,6 +21,8 @@
 #define MoveBackward            2
 #define TurnRight               3
 #define TurnLeft                4
+#define BankLeft                5
+#define BankRight               6
 
 extern Servo right_motor;
 extern Servo left_motor;
@@ -29,7 +31,7 @@ extern Servo pickup_motor;
 extern int encoder_pickup;
 extern bool pickup_calibration_complete;
 extern int joystick_map_x;
-extern 
+//extern 
 
 
 void check_speed_limits(/*parameters*/);
