@@ -15,15 +15,22 @@
 #define PICKUP_ENCODER_DIST_IN 500
 #define MOTOR_STOP 1500
 
+//States for Navigation State machine 
+#define No_move                 0
+#define Moveforward             1
+#define MoveBackward            2
+#define TurnRight               3
+#define TurnLeft                4
+
 extern Servo right_motor;
 extern Servo left_motor;
 extern Servo Gate_servo;
 extern Servo pickup_motor;
 extern int encoder_pickup;
-extern int limit_switch;
 extern bool pickup_calibration_complete;
 extern int joystick_map_x;
-extern bool can_trigger;
+extern 
+
 
 void check_speed_limits(/*parameters*/);
 void DC_motors();

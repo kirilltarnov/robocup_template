@@ -162,7 +162,7 @@ int Right_sensor;
 int Left_sensor;
 void infra_red_callback();
 
-//SparkFun_VL53L5CX myImager;
+SparkFun_VL53L5CX myImager;
 VL53L5CX_ResultsData measurementData; // Result data class structure, 1356 byes of RAM
 VL53L5CX_DetectionThresholds detectionThresholds;
 
@@ -192,8 +192,8 @@ Task tSensor_average(SENSOR_AVERAGE_PERIOD,      SENSOR_AVERAGE_NUM_EXECUTE,    
 Task tSet_motor(SET_MOTOR_TASK_PERIOD,           SET_MOTOR_TASK_NUM_EXECUTE,      &DC_motors);
 
 // Tasks to scan for weights and collection upon detection
-Task tWeight_scan(WEIGHT_SCAN_TASK_PERIOD,       WEIGHT_SCAN_TASK_NUM_EXECUTE,    &State_machine);
-Task tCollect_weight(COLLECT_WEIGHT_TASK_PERIOD, COLLECT_WEIGHT_TASK_NUM_EXECUTE, &collect_weight);
+//Task tWeight_scan(WEIGHT_SCAN_TASK_PERIOD,       WEIGHT_SCAN_TASK_NUM_EXECUTE,    &State_machine);
+//Task tCollect_weight(COLLECT_WEIGHT_TASK_PERIOD, COLLECT_WEIGHT_TASK_NUM_EXECUTE, &collect_weight);
 
 // Tasks to search for bases and unload weights
 Task tReturn_to_base(RETURN_TO_BASE_TASK_PERIOD, RETURN_TO_BASE_TASK_NUM_EXECUTE, &return_to_base);
@@ -242,16 +242,15 @@ void pin_init() {
   pinMode(encoder3PinA, INPUT);
   pinMode(encoder3PinB, INPUT);
   pinMode(limit_switch_pin, INPUT);
-<<<<<<< HEAD
+
   pinMode(limit_switch2_pin, INPUT);
   attachInterrupt(digitalPinToInterrupt(encoder1PinA), doEncoder1A, CHANGE);  //Set up an interrupt for each encoder
   attachInterrupt(digitalPinToInterrupt(encoder2PinA), doEncoder2A, CHANGE);
   attachInterrupt(digitalPinToInterrupt(encoder3PinA), doEncoder3A, CHANGE);
-=======
+
   //attachInterrupt(digitalPinToInterrupt(encoder1PinA), doEncoder1A, CHANGE);  //Set up an interrupt for each encoder
   //attachInterrupt(digitalPinToInterrupt(encoder2PinA), doEncoder2A, CHANGE);
   //attachInterrupt(digitalPinToInterrupt(encoder3PinA), doEncoder3A, CHANGE);
->>>>>>> 326ea380b5da39bd2540076e1038ed9950ab05c0
   right_motor.attach(encoder2serialpin);
   left_motor.attach(encoder1serialpin);
   //Gate_servo.attach(7);
@@ -282,28 +281,22 @@ void pin_init() {
 
   Serial.println("Initializing sensor board. This can take up to 10s. Please wait.");
 
-//  if (myImager.begin() == false)
-//  {
-//    Serial.println(F("Sensor not found - check your wiring. Freezing"));
-//    while (1) ;
-//  }
-//
-//  myImager.setResolution(4 * 4); //Enable all 64 pads
-//
-//  imageResolution = myImager.getResolution(); //Query sensor for current resolution - either 4x4 or 8x8
-//  imageWidth = sqrt(imageResolution); //Calculate printing width
-//  myImager.setRangingMode(SF_VL53L5CX_RANGING_MODE::CONTINUOUS); //Change to continuous to get data in constantly
-//  myImager.setSharpenerPercent(100); //Set sharpener percentage to avoid edges of objects being in adjacent zones
-//  myImager.setTargetOrder(SF_VL53L5CX_TARGET_ORDER::CLOSEST);
-//  myImager.startRanging();
+  if (myImager.begin() == false)
+  {
+    Serial.println(F("Sensor not found - check your wiring. Freezing"));
+    while (1) ;
+  }
+
+  myImager.setResolution(8 * 8); //Enable all 64 pads
+
+  imageResolution = myImager.getResolution(); //Query sensor for current resolution - either 4x4 or 8x8
+  imageWidth = sqrt(imageResolution); //Calculate printing width
+  myImager.setRangingMode(SF_VL53L5CX_RANGING_MODE::CONTINUOUS); //Change to continuous to get data in constantly
+  myImager.setSharpenerPercent(100); //Set sharpener percentage to avoid edges of objects being in adjacent zones
+  myImager.setTargetOrder(SF_VL53L5CX_TARGET_ORDER::CLOSEST);
+  myImager.startRanging();
 
 
-//  Serial.println("Initializing sensor board. This can take up to 10s. Please wait.");
-//  if (myImager.begin() == false)
-//  {
-//    Serial.println(F("Sensor not found - check your wiring. Freezing"));
-//    while (1) ;
-//  }
 
 
   // //enable detection thresholds, '1' to enable thresholds. This allows to set parameters and get parameters
@@ -346,8 +339,8 @@ void task_init() {
   taskManager.addTask(tSensor_average);
   taskManager.addTask(tread_limit);
   taskManager.addTask(tSet_motor);
-  taskManager.addTask(tWeight_scan);
-  taskManager.addTask(tCollect_weight);
+  //taskManager.addTask(tWeight_scan);
+//  taskManager.addTask(tCollect_weight);
   taskManager.addTask(tReturn_to_base);
   taskManager.addTask(tDetect_base);
   taskManager.addTask(tUnload_weights);
@@ -364,8 +357,8 @@ void task_init() {
   //  tSensor_average.enable();
    tread_limit.enable();
    tSet_motor.enable();
-   tWeight_scan.enable();
-    tCollect_weight.enable();
+//   tWeight_scan.enable();
+//    tCollect_weight.enable();
   //  tReturn_to_base.enable();
   //  tDetect_base.enable();
   //  tUnload_weights.enable();
@@ -394,7 +387,7 @@ void loop() {
   // }
   // weight_found = io.digitalRead(SX1509_AIO0); 
   // Serial.println(weight_found);
-<<<<<<< HEAD
+
  //Poll sensor for new data (ToF)
   
 // if (myImager.isDataReady() == true)
@@ -425,7 +418,7 @@ void loop() {
 //   }
 // }
 // delay(5); //Small delay between polling
-=======
+
 
   // set old column and row sums
   // for (int i = 0; i < 5; i++) {
@@ -448,7 +441,7 @@ void loop() {
      {
        for (int x = imageWidth - 3 ; x >= 0 ; x--)
        {
-        Serial.print("\t");
+        //Serial.print("\t");
         // take the raw data from the VL sensor, round it to a number of 10
         //  measurement_rounded = measurementData.distance_mm[x+y]/10;
         //  measurement_rounded = round(measurement_rounded)*10;
@@ -468,21 +461,21 @@ void loop() {
           VL53_raw_matrix[y/imageWidth][x] -= 250;
         } 
         if (y == imageWidth*7) {
-          VL53_weighted_matrix[y/imageWidth][x] = VL53_raw_matrix[y/imageWidth][x] * -2;
-        } else if (y == imageWidth*6) {
           VL53_weighted_matrix[y/imageWidth][x] = VL53_raw_matrix[y/imageWidth][x] * -1;
-        } else if (y == imageWidth*5) {
+        } else if (y == imageWidth*6) {
           VL53_weighted_matrix[y/imageWidth][x] = VL53_raw_matrix[y/imageWidth][x] * -0.5;
+        } else if (y == imageWidth*5) {
+          VL53_weighted_matrix[y/imageWidth][x] = VL53_raw_matrix[y/imageWidth][x] * -0.25;
         } else if (y == imageWidth*4) {
           VL53_weighted_matrix[y/imageWidth][x] = VL53_raw_matrix[y/imageWidth][x] * 0;
         } else if (y == imageWidth*3) {
           VL53_weighted_matrix[y/imageWidth][x] = VL53_raw_matrix[y/imageWidth][x] * 0;
         } else if (y == imageWidth*2) {
-          VL53_weighted_matrix[y/imageWidth][x] = VL53_raw_matrix[y/imageWidth][x] * 0.5;
+          VL53_weighted_matrix[y/imageWidth][x] = VL53_raw_matrix[y/imageWidth][x] * 0.25;
         } else if (y == imageWidth*1) {
-          VL53_weighted_matrix[y/imageWidth][x] = VL53_raw_matrix[y/imageWidth][x] * 1;
+          VL53_weighted_matrix[y/imageWidth][x] = VL53_raw_matrix[y/imageWidth][x] * 0.5;
         } else if (y == imageWidth*0) {
-          VL53_weighted_matrix[y/imageWidth][x] = VL53_raw_matrix[y/imageWidth][x] * 2;
+          VL53_weighted_matrix[y/imageWidth][x] = VL53_raw_matrix[y/imageWidth][x] * 1;
         } 
 
         //Serial.print(VL53_weighted_matrix[y/imageWidth][x]);    
@@ -492,10 +485,10 @@ void loop() {
       //Serial.println();
     }   
  }
->>>>>>> 326ea380b5da39bd2540076e1038ed9950ab05c0
+
  
   //Sum weighted and raw matrices
-  //weighted_sum = 0;
+  weighted_sum = 0;
   raw_sum = 0;
   for (int row = 0; row <7; row++) {
     for (int col = 0; col < 5; col++) {
