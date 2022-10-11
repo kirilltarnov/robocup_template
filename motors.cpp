@@ -9,7 +9,7 @@ bool thing = true;
 int pickup_state = 0;
 int Navigation_State = 0;
 int turn_angle = 0;
-int limit_switch;
+int limit_switch_inner;
 /* Check whether the speed value to be written is within the maximum
  *  and minimum speed caps. Act accordingly.
  *
@@ -131,19 +131,22 @@ void DC_motors() {
       
   switch(pickup_state) {
     case 0:
-      pickup_motor.writeMicroseconds(joystick_map_x);
+    //Use joystick before Start PB is pressed
+      //pickup_motor.writeMicroseconds(joystick_map_x);
       if (can_trigger == false) {
         pickup_state = 1;
       }
       break;
+    //Move outward
     case 1:
-      if(limit_switch2 == 0) {
+      if(limit_switch_outer == 0) {
         pickup_motor.writeMicroseconds(1050);
       } else {
         pickup_motor.writeMicroseconds(1500);
         pickup_state = 2;
       }
       break;
+    //If weight detected, move inward
     case 2:
       if (low_right_sensor > 350) {
         pickup_motor.writeMicroseconds(1950);
@@ -151,11 +154,10 @@ void DC_motors() {
       }
       break;
     case 3:
-      if (limit_switch == HIGH) {
+      if (limit_switch_inner == HIGH) {
         pickup_state = 1;
         can_trigger = true;
-    }
-    
+    }   
   }
 
 //  if(Navigation_State == 1){

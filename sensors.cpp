@@ -14,7 +14,7 @@
 #define encoder1PinB 3
 #define encoder2PinA 4
 #define encoder2PinB 5
-bool limit_switch2;
+bool limit_switch_outer;
 int low_right_sensor;
 bool pole_ramp_found = false;
 // int8_t counter_average = 0;
@@ -61,8 +61,8 @@ void read_colour(/* Parameters */){
 }
 
 void read_limit() {
-    limit_switch = digitalRead(20);
-    limit_switch2 = digitalRead(14);
+    limit_switch_inner = digitalRead(20);
+    limit_switch_outer = digitalRead(14);
 }
 
 int buffer1[4][4][10];
