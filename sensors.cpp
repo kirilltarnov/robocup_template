@@ -156,10 +156,13 @@ void SENSOR_TOF(/* Parameters */){
     }
   }
 
+  // Serial.print("Raw sum: ");
+  // Serial.print(raw_sum);
+
   //Use raw sums to distinguish between weights and poles/ramps
   if (raw_sum < 0) {
     //Then something is in the FoV
-    if (raw_sum < -250) {
+    if (raw_sum < -1500) {
       pole_ramp_found = true; 
       Serial.println("pole ramp found");
     } else {

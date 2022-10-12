@@ -145,7 +145,7 @@ Task tRead_ultrasonic(US_READ_TASK_PERIOD,       US_READ_TASK_NUM_EXECUTE,      
 Task tRead_infrared(IR_READ_TASK_PERIOD,         IR_READ_TASK_NUM_EXECUTE,        &read_infrared);
 Task tRead_colour(COLOUR_READ_TASK_PERIOD,       COLOUR_READ_TASK_NUM_EXECUTE,    &read_colour);
 Task tread_limit(read_limit_TASK_PERIOD,      read_limit_TASK_NUM_EXECUTE,      &read_limit);
-Task tSensor_average(SENSOR_TOF_PERIOD,      SENSOR_TOF_NUM_EXECUTE,      &SENSOR_TOF);
+Task tSENSOR_TOF(SENSOR_TOF_PERIOD,      SENSOR_TOF_NUM_EXECUTE,      &SENSOR_TOF);
 Task tnavigation(SET_NAVIGATION_TASK_PERIOD,           SET_NAVIGATION_TASK_NUM_EXECUTE,      &navigation);
 Task tpickup(SET_PICKUP_TASK_PERIOD,           SET_PICKUP_TASK_NUM_EXECUTE,      &pickup);
 
@@ -234,7 +234,7 @@ void task_init() {
   taskManager.addTask(tRead_ultrasonic);   //reading ultrasonic
   taskManager.addTask(tRead_infrared);
   taskManager.addTask(tRead_colour);
-  taskManager.addTask(tSensor_average);
+  taskManager.addTask(tSENSOR_TOF);
   taskManager.addTask(tread_limit);
   taskManager.addTask(tnavigation);
   taskManager.addTask(tpickup);
@@ -243,7 +243,7 @@ void task_init() {
     tRead_ultrasonic.enable();
    tRead_infrared.enable();
     tRead_colour.enable();
-    tSensor_average.enable();
+    tSENSOR_TOF.enable();
    tread_limit.enable();
    tnavigation.enable();
    tpickup.enable();
@@ -261,7 +261,6 @@ void loop() {
   //Joystick for testing only
   joystick_x_pos = analogRead(JOYSTICK_PIN);
   joystick_map_x = map(joystick_x_pos, 0, 950, 1050, 1950);
-
 }
 
 void doEncoder1A() {

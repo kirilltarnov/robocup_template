@@ -10,6 +10,8 @@ int Navigation_State = 0;
 int turn_angle = 0;
 int limit_switch_inner;
 int jam_timer = 0;
+int decel = 0;
+int turning_timer = 0;
 uint8_t pick_up_counter = 0;
 /* Check whether the speed value to be written is within the maximum
  *  and minimum speed caps. Act accordingly.
@@ -33,6 +35,12 @@ void navigation() {
   if(io.digitalRead(15) == 1){
     can_trigger = false;
   }
+
+  if ((turning_timer > 80) && (Navigation_State != Deceleration)) {
+    Navigation_State = TurnOnSpot; 
+  } else {
+    turning_timer += 1;
+  }
   //monitoring
 //  Serial.print("Navigation State: ");
 //  Serial.print(Navigation_State);
@@ -45,9 +53,9 @@ void navigation() {
 
   switch (Navigation_State) {
     case No_move:
-        if (io.digitalRead(15) == 1) {
-          Navigation_State = Moveforward;
-        }
+      if (io.digitalRead(15) == 1) {
+        Navigation_State = Moveforward;
+      }
       break;
       
     case Moveforward:
@@ -59,19 +67,19 @@ void navigation() {
         Navigation_State = TurnRight;
         Encoder_Left = 0; //reset encoder values 
         Encoder_Right = 0;
-        turn_angle = random(2000,5000); // determine turn angle
+        turn_angle = random(500,3000); // determine turn angle
       } else if (Left_sensor < 550 && Right_sensor > 550) {
         //Checking if there is an obstruction to the right of the robot, turn left
         Navigation_State = TurnLeft;
         Encoder_Left = 0; //reset encoder values 
         Encoder_Right = 0;
-        turn_angle = random(2000,5000); // determine turn angle
+        turn_angle = random(500,3000); // determine turn angle
       } else if ((Left_sensor > 550 && Right_sensor > 550) || pole_ramp_middle) {
         //Checking if there is an obstruction straight ahead, move back and turn
         Navigation_State = MoveBackward;
         Encoder_Left = 0; //reset encoder values 
         Encoder_Right = 0;
-        turn_angle = random(3000,6000); // determine turn angle
+        turn_angle = random(1000,3000); // determine turn angle
       } else  if (pole_ramp_left) {
         Navigation_State = BankRight;
         Encoder_Left = 0; //reset encoder values 
@@ -138,11 +146,37 @@ void navigation() {
           Navigation_State = Moveforward;
         }
         break; 
-  }
-
+      case Deceleration:
+        if (decel < 90) {
+          decel += 10;
+          right_motor.writeMicroseconds(1950 - decel);
+          left_motor.writeMicroseconds(1950 - decel);
+        } else {
+          right_motor.writeMicroseconds(1500);
+          left_motor.writeMicroseconds(1500); 
+          if (limit_switch_outer == 1) {
+            Navigation_State = Moveforward;
+          }
+        }
+        break;
+      case TurnOnSpot:
+        Encoder_Right = 0;
+        right_motor.writeMicroseconds(1950);
+        left_motor.writeMicroseconds(1050);
+        if ((Encoder_Right > -1500) || (weight_found)) {
+          Navigation_State = Moveforward;
+        }
+        break;
+  
+ }
+  Serial.print("pick_up state: ");
+  Serial.print(pickup_state);
+  Serial.print(" Decel :");
+  Serial.println(decel);
+  // Serial.println(low_right_sensor);
+  Serial.println(jam_timer);
 }
 void pickup() {
-  //Serial.print(pickup_state);
   switch(pickup_state) {
     case 0:
     //Use joystick before Start PB is pressed
@@ -167,17 +201,17 @@ void pickup() {
         if (pick_up_counter > 4) {
           pickup_state = 1;
         } else {
-          pickup_motor.writeMicroseconds(1950);
           pickup_state = 3;
           jam_timer = 0;
+          decel = 0; 
         }
 
       }
       break;
-    case 3:
+    case 3:                
+      Navigation_State = Deceleration;
+      pickup_motor.writeMicroseconds(1950);
       if (jam_timer > 25) {
-        
-      } else if (jam_timer > 90) {
         pickup_state = 1;
       }
       jam_timer += 1;
@@ -185,7 +219,8 @@ void pickup() {
         pick_up_counter += 1;
         pickup_state = 1;
         can_trigger = true;
-    }   
+      }  
+      break; 
   }
 
 
