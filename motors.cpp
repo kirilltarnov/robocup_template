@@ -43,14 +43,14 @@ void DC_motors() {
     turning_timer += 1;
   }
   //monitoring
-  // Serial.print("Navigation State: ");
-  // Serial.print(Navigation_State);
-  // Serial.print(" Left encoder: ");
-  // Serial.print(Encoder_Left);
-  // Serial.print(" Right encoder: ");
-  // Serial.print(Encoder_Right);
-  // Serial.print(" Turning angle: ");
-  // Serial.println(turn_angle);
+//  Serial.print("Navigation State: ");
+//  Serial.print(Navigation_State);
+//  Serial.print(" Left encoder: ");
+//  Serial.print(Encoder_Left);
+//  Serial.print(" Right encoder: ");
+//  Serial.print(Encoder_Right);
+//  Serial.print(" Turning angle: ");
+//  Serial.println(turn_angle);
 
   switch (Navigation_State) {
     case No_move:

@@ -34,10 +34,22 @@ int imageResolution = 0; //Used to pretty print output
 int imageWidth = 0; //Used to pretty print output
 int VL53_raw_matrix [8][6]; //16 int array to hold previous time-step data
 int VL53_weighted_matrix [8][6]; //16 int array to hold previous time-step data
+int CentiA;
+int CentiB;
 
 // Read ultrasonic value
 void read_ultrasonic(/* Parameters */){
-  Serial.println("Ultrasonic value \n");
+    digitalWrite(32, LOW);
+    digitalWrite(30, LOW);
+  delayMicroseconds(2);
+  digitalWrite(32, HIGH);
+  digitalWrite(30, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(32, LOW);
+  digitalWrite(30, LOW);
+    CentiA = pulseIn(33, HIGH);
+    CentiB =  pulseIn(31, HIGH);
+  
 }
 
 // Read infrared value
@@ -70,43 +82,43 @@ int averageinput[4][4];
 int head = 1;
 int tail = 9;
 
-void circ_buffer_add(int input[4][4]) {
- for (int i =0; i < 4; i++) {
-  for (int j =0; j < 4; j++) {
-    buffer1[i][j][tail] = input[i][j];
-  }
- }
- if (tail == 9) {
-  tail = 0;
- } else {
-  tail = tail+1;
- }
- if (head == 9) {
-  head = 0;
- } else {
-  head = head + 1;
- }
-}
- void average_Buffer() {
-  for (int i =0; i < 4; i++) {
-    for (int j =0; j < 4; j++) {
-      averageinput[i][j] = 0;
-    }
-  }  
-  for (int i =0; i < 4; i++) {
-    for (int j =0; j < 4; j++) {
-      for (int z =0; z <10; z++) {
-        averageinput[i][j] = buffer1[i][j][z] + averageinput[i][j];
-      }
-    }
-  }
-  for (int i =0; i < 4; i++) {
-    for (int j =0; j < 4; j++) {
-
-      averageinput[i][j] = (round(averageinput[i][j]/100))*10;
-    }
-  }
- }
+//void circ_buffer_add(int input[4][4]) {
+// for (int i =0; i < 4; i++) {
+//  for (int j =0; j < 4; j++) {
+//    buffer1[i][j][tail] = input[i][j];
+//  }
+// }
+// if (tail == 9) {
+//  tail = 0;
+// } else {
+//  tail = tail+1;
+// }
+// if (head == 9) {
+//  head = 0;
+// } else {
+//  head = head + 1;
+// }
+//}
+// void average_Buffer() {
+//  for (int i =0; i < 4; i++) {
+//    for (int j =0; j < 4; j++) {
+//      averageinput[i][j] = 0;
+//    }
+//  }  
+//  for (int i =0; i < 4; i++) {
+//    for (int j =0; j < 4; j++) {
+//      for (int z =0; z <10; z++) {
+//        averageinput[i][j] = buffer1[i][j][z] + averageinput[i][j];
+//      }
+//    }
+//  }
+//  for (int i =0; i < 4; i++) {
+//    for (int j =0; j < 4; j++) {
+//
+//      averageinput[i][j] = (round(averageinput[i][j]/100))*10;
+//    }
+//  }
+// }
 
 
 

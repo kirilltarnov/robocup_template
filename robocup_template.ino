@@ -58,27 +58,23 @@ const byte SX1509_AIO15 = 15;
 
 // Task period Definitions
 // ALL OF THESE VALUES WILL NEED TO BE SET TO SOMETHING USEFUL !!!!!!!!!!!!!!!!!!!!
-#define US_READ_TASK_PERIOD                 40
-#define IR_READ_TASK_PERIOD                 40
+#define US_READ_TASK_PERIOD                 80
+#define IR_READ_TASK_PERIOD                 10
 #define COLOUR_READ_TASK_PERIOD             40
 #define SENSOR_AVERAGE_PERIOD               40
-#define read_limit_TASK_PERIOD            40
-#define SET_MOTOR_TASK_PERIOD               40
+#define read_limit_TASK_PERIOD            60
+#define SET_MOTOR_TASK_PERIOD               20
 #define WEIGHT_SCAN_TASK_PERIOD             40
 #define COLLECT_WEIGHT_TASK_PERIOD          40
-#define RETURN_TO_BASE_TASK_PERIOD          40
-#define DETECT_BASE_TASK_PERIOD             40
-#define UNLOAD_WEIGHTS_TASK_PERIOD          40
-#define CHECK_WATCHDOG_TASK_PERIOD          40
-#define VICTORY_DANCE_TASK_PERIOD           40
-#define Jamming_check_period                40             
+
+        
 
 
 
 
 // Task execution amount definitions
 // -1 means indefinitely
-#define US_READ_TASK_NUM_EXECUTE           0
+#define US_READ_TASK_NUM_EXECUTE           -1
 #define IR_READ_TASK_NUM_EXECUTE           -1
 #define COLOUR_READ_TASK_NUM_EXECUTE       0
 #define read_limit_TASK_NUM_EXECUTE      -1
@@ -91,7 +87,6 @@ const byte SX1509_AIO15 = 15;
 #define UNLOAD_WEIGHTS_TASK_NUM_EXECUTE    0
 #define CHECK_WATCHDOG_TASK_NUM_EXECUTE    0
 #define VICTORY_DANCE_TASK_NUM_EXECUTE     0
-#define Jamming_check_NUM_EXECUTE          1   
 
 // Pin definitions
 #define IO_POWER  49
@@ -107,6 +102,7 @@ const byte SX1509_AIO15 = 15;
 #define limit_switch_pin 20
 #define limit_switch2_pin 14
 #define JOYSTICK_PIN 27
+
 
 //VL53L5CX object detection set-up
 #define WEIGHT_ZONE_NUM 1 //a weight should take up a certain amount of zones
@@ -187,9 +183,9 @@ Task tSet_motor(SET_MOTOR_TASK_PERIOD,           SET_MOTOR_TASK_NUM_EXECUTE,    
 //Task tCollect_weight(COLLECT_WEIGHT_TASK_PERIOD, COLLECT_WEIGHT_TASK_NUM_EXECUTE, &collect_weight);
 
 // Tasks to search for bases and unload weights
-Task tReturn_to_base(RETURN_TO_BASE_TASK_PERIOD, RETURN_TO_BASE_TASK_NUM_EXECUTE, &return_to_base);
-Task tDetect_base(DETECT_BASE_TASK_PERIOD,       DETECT_BASE_TASK_NUM_EXECUTE,    &detect_base);
-Task tUnload_weights(UNLOAD_WEIGHTS_TASK_PERIOD, UNLOAD_WEIGHTS_TASK_NUM_EXECUTE, &unload_weights);
+//Task tReturn_to_base(RETURN_TO_BASE_TASK_PERIOD, RETURN_TO_BASE_TASK_NUM_EXECUTE, &return_to_base);
+//Task tDetect_base(DETECT_BASE_TASK_PERIOD,       DETECT_BASE_TASK_NUM_EXECUTE,    &detect_base);
+//Task tUnload_weights(UNLOAD_WEIGHTS_TASK_PERIOD, UNLOAD_WEIGHTS_TASK_NUM_EXECUTE, &unload_weights);
 
 // Tasks to check the 'watchdog' timer (These will need to be added in)
 //Task tCheck_watchdog(CHECK_WATCHDOG_TASK_PERIOD, CHECK_WATCHDOG_TASK_NUM_EXECUTE, &check_watchdog);
@@ -233,6 +229,11 @@ void pin_init() {
   pinMode(encoder3PinA, INPUT);
   pinMode(encoder3PinB, INPUT);
   pinMode(limit_switch_pin, INPUT);
+  pinMode(32, OUTPUT);
+  pinMode(33, INPUT);
+  pinMode(30, OUTPUT);
+  pinMode(31,INPUT);
+  
 
   pinMode(limit_switch2_pin, INPUT);
   attachInterrupt(digitalPinToInterrupt(encoder1PinA), doEncoder1A, CHANGE);  //Set up an interrupt for each encoder
@@ -294,16 +295,16 @@ void task_init() {
   taskManager.addTask(tSet_motor);
   //taskManager.addTask(tWeight_scan);
 //  taskManager.addTask(tCollect_weight);
-  taskManager.addTask(tReturn_to_base);
-  taskManager.addTask(tDetect_base);
-  taskManager.addTask(tUnload_weights);
+//  taskManager.addTask(tReturn_to_base);
+//  taskManager.addTask(tDetect_base);
+//  taskManager.addTask(tUnload_weights);
   //taskManager.addTask(tJammingcheck);
 
   //taskManager.addTask(tCheck_watchdog);
   //taskManager.addTask(tVictory_dance);
 
   //enable the tasks
-  //  tRead_ultrasonic.enable();
+    tRead_ultrasonic.enable();
    tRead_infrared.enable();
   // tread_encoder.enable();
   //  tRead_colour.enable();
@@ -328,117 +329,10 @@ void task_init() {
 //**********************************************************************************
 void loop() {
   taskManager.execute();    //execute the scheduler
-  //Serial.println(joystick_map_x);
   //Joystick for testing only
   joystick_x_pos = analogRead(JOYSTICK_PIN);
   joystick_map_x = map(joystick_x_pos, 0, 950, 1050, 1950);
-
-
-  // Serial.print("Left sensor: ");
-  // Serial.println(Left_sensor);
-  // Serial.print("Right sensor: ");
-  // Serial.println(Right_sensor);
-  // if (set_thresh_enable == 0) {
-  //   Serial.println("VL sensor threshold ENABLED");
-  // }
-  // if (set_thresh_status == 0) {
-  //   Serial.println("VL sensor threshold SET");
-  // }
-  // weight_found = io.digitalRead(SX1509_AIO0); 
-  // Serial.println(weight_found);
-
-
-  // set old column and row sums
-  // for (int i = 0; i < 5; i++) {
-  //   col_sum_old[i] = col_sum[i];
-  // }
-  // for (int j = 0; j < 7; j++) {
-  //   row_sum_old[j] = row_sum[j];
-  // }
-  
-
-  
-  //Serial.println(raw_sum);
-  // filter the data from the VL53 sensor
-  // circ_buffer_add(VL53_raw_matrix);
-  // average_Buffer();
-  
-  // Use data from VL53 sensor to identify weights, ramp and pole
-  // uint16_t col_sum_temp_array[6] = {0,0,0,0,0,0};
-  // for (int row = 0; row <7; row++) {
-  //   uint16_t row_sum_temp = 0; 
-  //   for (int col = 0; col < 5; col++) {
-  //     //Serial.print("\t");
-  //     row_sum_temp += VL53_raw_matrix[row][col];
-  //     col_sum_temp_array[col] += VL53_raw_matrix[row][col];
-  //     //Serial.print(averageinput[row][col]);
-  //   }
-  //   //Serial.println();
-  //   row_sum[row] = row_sum_temp;
-  // }
-  // //Serial.println();
-  // for (int i = 0; i < 4; i++) {
-  //   col_sum[i] = col_sum_temp_array[i];
-  // }
-
-  // // Checking for ramp, weight and pole (other)
-  // for (int rows = 0; rows < 7; rows++) {
-  //   row_difference = row_sum[rows]-row_sum_old[rows]; //-ve number if something is in the FoV
-  //   //checking if a row has decreased by the distance of 1 weight in a zone
-  //   if (row_difference < WEIGHT_DISTANCE_ZONE) {
-  //     if (row_difference > POLE_DISTANCE_ZONE) {
-  //       weight_found = true; 
-  //       weight_row_zone = rows;
-  //     } else {
-  //       pole_ramp_found = true;
-  //     }
-  //   }
-  // }
-
-  //   for (int cols = 1; cols < 3; cols++) {
-  //     col_difference = col_sum[cols]-col_sum_old[cols]; //-ve number if something is in the FoV
-  //     //checking if a row has decreased by the distance of 1 weight in a zone
-  //     if (col_difference < WEIGHT_DISTANCE_ZONE) {
-  //       if (col_difference > POLE_DISTANCE_ZONE) {
-  //         weight_col_zone = cols;
-  //       } else {
-  //         pole_ramp_found = true;
-  //       }
-  //     }
-  //   }
-
-  // print filtered, rounded data from VL
-  // for (int j = 0; j < 4; j++) {
-  //     Serial.print("\t");
-  //     Serial.print(row_sum[j]);
-  //     Serial.print("\t");
-  //     Serial.println(col_sum[j]);
-  // }
-  // Serial.println();
-  //Serial.println(row_difference);
-  // if (weight_found) {
-  //   Serial.print("Weight found in row: ");
-  //   Serial.print(weight_row_zone);
-  //   Serial.print(", column: ");
-  //   Serial.println(weight_col_zone);
-  //   weight_found = false; 
-  // }
 }
-
-
-
-
-//  if (pickup_mechanism == WEIGHT_FOUND) {
-//    tJammingcheck.enable();
-//  } else{
-//    tJammingcheck.disable();
-//  }
-
-  //limit_switch = digitalRead(limit_switch_pin) == HIGH;
-//  Serial.println(limit_switch);
-//  Serial.println(State);
-//  Serial.println("Another scheduler execution cycle has oocured \n");
-//}
 
 void doEncoder1A() {
   // Test transition
