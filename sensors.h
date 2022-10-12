@@ -8,6 +8,11 @@
 #ifndef SENSORS_H_
 #define SENSORS_H_
 
+#define encoder1PinA 2
+#define encoder1PinB 3
+#define encoder2PinA 4
+#define encoder2PinB 5
+
 extern SX1509 io;
 extern int Right_sensor;
 extern int Left_sensor;
@@ -20,19 +25,20 @@ extern boolean weight_found;
 
 extern bool limit_switch_outer;
 
-extern int buffer1[4][4][10];
-extern int averageinput[4][4];
-extern int head;
-extern int tail;
-
 extern bool pole_ramp_middle;
 extern bool pole_ramp_left;
 extern bool pole_ramp_right;
 extern bool weight_left;
 extern bool weight_right;
 extern bool weight_middle;
-extern int CentiA;
-extern int CentiB;
+extern int ultrasoundA;
+extern int ultrasoundB;
+extern int ultratimerA;
+extern int ultratimerB;
+extern int ultrathingA;
+extern int ultrathingB;
+extern int ultraA;
+extern int ultraB;
 
 
 // Read ultrasonic value
@@ -50,7 +56,7 @@ void sensor_average(/* Parameters */);
 
 void circ_buffer_add(int input[4][4]);
 
-void average_Buffer();
+void SENSOR_TOF();
 void my_imagerintit();
 
 #endif /* SENSORS_H_ */

@@ -10,10 +10,9 @@
 #include "Arduino.h"
 
 // Local definitions
-#define encoder1PinA 2
-#define encoder1PinB 3
-#define encoder2PinA 4
-#define encoder2PinB 5
+
+
+
 bool limit_switch_outer;
 int low_right_sensor;
 bool pole_ramp_found = false;
@@ -36,29 +35,48 @@ int VL53_raw_matrix [8][6]; //16 int array to hold previous time-step data
 int VL53_weighted_matrix [8][6]; //16 int array to hold previous time-step data
 int CentiA;
 int CentiB;
-const int AtrigPin = 32;
-const int AechoPin = 33;
-
-const int BtrigPin = 30;
-const int BechoPin = 31;
-long durationA,durationB;
-
+int ultrasoundA = 0;
+int ultrasoundB = 0;
+int ultratimerA;
+int ultratimerB;
+int ultrathingA;
+int ultrathingB;
+int ultraA;
+int ultraB;
 // Read ultrasonic value
-void read_ultrasonic(void){
-  // //send signal out
-  // digitalWrite(AtrigPin, LOW);
-  // //digitalWrite(BtrigPin, LOW);
-  // //delayMicroseconds(2);
-  // digitalWrite(AtrigPin, HIGH);
-  // //digitalWrite(BtrigPin, HIGH);
-  // //delayMicroseconds(10);
-  // digitalWrite(AtrigPin, LOW);
-  // //digitalWrite(BtrigPin, LOW);
-  
-  // durationA = pulseIn(AechoPin, HIGH,10);
-  // //durationB = pulseIn(BechoPin, HIGH,0);
-  // Serial.println(durationA);
-  
+void read_ultrasonic(/* Parameters */){
+  if (GPT1_CNT - ultratimerA > 1000 || GPT1_CNT < ultratimerA) {
+    digitalWrite(32, LOW);
+    digitalWrite(30, LOW);
+    delayMicroseconds(2);
+    digitalWrite(32, HIGH);
+    digitalWrite(30, HIGH);
+    delayMicroseconds(10);
+    digitalWrite(32, LOW);
+    digitalWrite(30, LOW);
+    ultratimerA  = GPT1_CNT;
+    ultratimerB  = GPT1_CNT;
+  } else if ( GPT1_CNT - ultratimerA > 500 || GPT1_CNT < ultratimerA) {
+    if (ultrathingB < ultraB){
+      ultrasoundB = ultrathingB - ultraB;
+    } else {
+      ultrasoundB = 100000;
+    }
+    if (ultrathingA < ultraA){
+      ultrasoundA = ultrathingA - ultraA;
+    } else 
+          ultrasoundA = 100000;
+  }
+//  Serial.print("ultraA:");
+//  Serial.print(ultraA);
+//  
+//  Serial.print(" ultraB:");
+  Serial.print(ultrathingA - ultraA);
+  Serial.print(" ");
+  Serial.print(ultrathingB - ultraB);
+  Serial.println();
+  //Serial.print(ultrasoundB);
+>>>>>>> d1cd43b63597b0a7af1b84a980b0ca94686d4c0b
 }
 
 // Read infrared value
@@ -78,7 +96,7 @@ void read_infrared(){
 
 // Read colour sensor value
 void read_colour(/* Parameters */){
-  Serial.println("colour value \n");  
+  
 }
 
 void read_limit() {
@@ -86,53 +104,9 @@ void read_limit() {
     limit_switch_outer = digitalRead(14);
 }
 
-int buffer1[4][4][10];
-int averageinput[4][4];
-int head = 1;
-int tail = 9;
-
-//void circ_buffer_add(int input[4][4]) {
-// for (int i =0; i < 4; i++) {
-//  for (int j =0; j < 4; j++) {
-//    buffer1[i][j][tail] = input[i][j];
-//  }
-// }
-// if (tail == 9) {
-//  tail = 0;
-// } else {
-//  tail = tail+1;
-// }
-// if (head == 9) {
-//  head = 0;
-// } else {
-//  head = head + 1;
-// }
-//}
-// void average_Buffer() {
-//  for (int i =0; i < 4; i++) {
-//    for (int j =0; j < 4; j++) {
-//      averageinput[i][j] = 0;
-//    }
-//  }  
-//  for (int i =0; i < 4; i++) {
-//    for (int j =0; j < 4; j++) {
-//      for (int z =0; z <10; z++) {
-//        averageinput[i][j] = buffer1[i][j][z] + averageinput[i][j];
-//      }
-//    }
-//  }
-//  for (int i =0; i < 4; i++) {
-//    for (int j =0; j < 4; j++) {
-//
-//      averageinput[i][j] = (round(averageinput[i][j]/100))*10;
-//    }
-//  }
-// }
-
-
 
 // Pass in data and average the lot
-void sensor_average(/* Parameters */){
+void SENSOR_TOF(/* Parameters */){
   pole_ramp_middle = false;
   pole_ramp_left = false;
   pole_ramp_right = false;
