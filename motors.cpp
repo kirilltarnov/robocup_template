@@ -49,13 +49,15 @@ void navigation() {
 
   switch (Navigation_State) {
     case No_move:
+              right_motor.writeMicroseconds(1500);
+          left_motor.writeMicroseconds(1500); 
       if (io.digitalRead(15) == 1) {
         Navigation_State = Moveforward;
       }
       break;
       
     case Moveforward:
-      if ((turning_timer > 20) && (Navigation_State != Deceleration)) {
+      if ((turning_timer > 40) && (Navigation_State != Deceleration)) {
         Navigation_State = TurnOnSpot; 
         Encoder_Left = 0;
         Encoder_Right = 0; 
@@ -122,7 +124,7 @@ void navigation() {
     case TurnRight:
       right_motor.writeMicroseconds(1050);
       left_motor.writeMicroseconds(1950);
-      if ((Encoder_Left > turn_angle && Encoder_Right < -turn_angle) || (weight_found)) {
+      if ((Encoder_Left > turn_angle && Encoder_Right < -turn_angle)) {
         Navigation_State = Moveforward;
       }
       break;
@@ -133,7 +135,7 @@ void navigation() {
       // if(Encoder_Left < -(12000 - turn_angle) && Encoder_Right > (12000 - turn_angle)) {
       //   Navigation_State = Moveforward;
       // }
-      if ((Encoder_Left < turn_angle && Encoder_Right > -turn_angle) || (weight_found)) {
+      if ((Encoder_Left < turn_angle && Encoder_Right > -turn_angle)) {
         Navigation_State = Moveforward;
       }
       break;
@@ -168,11 +170,14 @@ void navigation() {
         }
         break;
       case TurnOnSpot:
-        right_motor.writeMicroseconds(1080);
-        left_motor.writeMicroseconds(1920);
-        if ((Encoder_Left > turn_angle && Encoder_Right < -turn_angle) || (weight_found)) {
+        right_motor.writeMicroseconds(1950);
+        left_motor.writeMicroseconds(1050);
+        if ((Encoder_Right > turn_angle && Encoder_Left < -turn_angle) || (weight_found)) {
           turning_timer = 0;
-          Navigation_State = Moveforward;
+          Encoder_Right = 0;
+          Encoder_Left = 0;
+          turn_angle = 100;
+          Navigation_State = TurnRight;
         }
         break;
   
@@ -220,8 +225,11 @@ void pickup() {
     case 3:                
       Navigation_State = Deceleration;
       pickup_motor.writeMicroseconds(1950);
-      if (jam_timer > 25) {
+      if (jam_timer > 27) {
+        Encoder_Left = 0;
+        Encoder_Right = 0;
         pickup_state = 1;
+        Navigation_State = MoveBackward;
       }
       jam_timer += 1;
       if (limit_switch_inner == HIGH) {

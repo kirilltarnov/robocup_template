@@ -90,9 +90,9 @@ void read_ultrasonic(/* Parameters */){
   ultrasonic_right_bool(&rightUltrasonic);
 
   if (US_left_wall_too_close == true) {
-    Serial.print("Ultrasonic left too close");
+    //Serial.print("Ultrasonic left too close");
   } else if (US_right_wall_too_close == true) {
-    Serial.print("Ultrasonic right too close");
+    //Serial.print("Ultrasonic right too close");
   }
 }
 
@@ -110,6 +110,7 @@ void read_infrared(){
   Left_sensor = analogRead(A9);  
   Right_sensor = analogRead(A8); 
   low_right_sensor = analogRead(A7);  
+  Serial.println(low_right_sensor);
 //  Serial.print("Right Sensor: ");
 //  Serial.print(Right_sensor);
 //  Serial.print(" Left Sensor: ");
@@ -154,24 +155,24 @@ void SENSOR_TOF(/* Parameters */){
      {
        for (int x = imageWidth - 3 ; x >= 0 ; x--)
        {
-        //Serial.print("\t");
+        Serial.print("\t");
         // take the raw data from the VL sensor, round it to a number of 10
         //  measurement_rounded = measurementData.distance_mm[x+y]/10;
         //  measurement_rounded = round(measurement_rounded)*10;
         //  measurement_rounded = int(measurement_rounded); //convert from double to int
         VL53_raw_matrix[y/imageWidth][x] = measurementData.distance_mm[x+y]; //place rounded data in a matrix 
         if (x == 5) {
-          VL53_raw_matrix[y/imageWidth][x] -= 700;
+          VL53_raw_matrix[y/imageWidth][x] -= 520;
         } else if (x == 4) {
-          VL53_raw_matrix[y/imageWidth][x] -= 500;
+          VL53_raw_matrix[y/imageWidth][x] -= 420;
         } else if (x == 3) {
-          VL53_raw_matrix[y/imageWidth][x] -= 400;
+          VL53_raw_matrix[y/imageWidth][x] -= 360;
         } else if (x == 2) {
-          VL53_raw_matrix[y/imageWidth][x] -= 350;
+          VL53_raw_matrix[y/imageWidth][x] -= 310;
         } else if (x == 1) {
-          VL53_raw_matrix[y/imageWidth][x] -= 300;
-        } else if (x == 0) {
           VL53_raw_matrix[y/imageWidth][x] -= 270;
+        } else if (x == 0) {
+          VL53_raw_matrix[y/imageWidth][x] -= 255;
         } 
         if (y == imageWidth*7) {
           VL53_weighted_matrix[y/imageWidth][x] = VL53_raw_matrix[y/imageWidth][x] * -1;
@@ -191,11 +192,11 @@ void SENSOR_TOF(/* Parameters */){
           VL53_weighted_matrix[y/imageWidth][x] = VL53_raw_matrix[y/imageWidth][x] * 1;
         } 
 
-        //Serial.print(VL53_raw_matrix[y/imageWidth][x]);    
+        Serial.print(VL53_raw_matrix[y/imageWidth][x]);    
         }
-        //Serial.println();
+        Serial.println();
       }
-      //Serial.println();
+      Serial.println();
     }   
  }
 
@@ -214,14 +215,14 @@ void SENSOR_TOF(/* Parameters */){
   Serial.println(raw_sum);
 
   //Use raw sums to distinguish between weights and poles/ramps
-  if (raw_sum < 50) {
+  if (raw_sum < -100) {
     //Then something is in the FoV
     if (raw_sum < -2000) {
       pole_ramp_found = true; 
-      Serial.println("pole ramp found");
+      //Serial.println("pole ramp found");
     } else if (raw_sum < 0) {
       weight_found = true; 
-      Serial.println("weight found");
+      //Serial.println("weight found");
     }
   }
   

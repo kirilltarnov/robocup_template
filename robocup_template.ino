@@ -43,7 +43,7 @@ const byte SX1509_AIO15 = 15;
 #define US_READ_TASK_PERIOD                 200
 #define IR_READ_TASK_PERIOD                 10
 #define COLOUR_READ_TASK_PERIOD             40
-#define SENSOR_TOF_PERIOD                   40
+#define SENSOR_TOF_PERIOD                   20
 #define read_limit_TASK_PERIOD              60
 #define SET_NAVIGATION_TASK_PERIOD          20
 #define SET_PICKUP_TASK_PERIOD              20    
