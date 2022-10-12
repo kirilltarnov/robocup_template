@@ -35,48 +35,45 @@ int VL53_raw_matrix [8][6]; //16 int array to hold previous time-step data
 int VL53_weighted_matrix [8][6]; //16 int array to hold previous time-step data
 int CentiA;
 int CentiB;
-int ultrasoundA = 0;
-int ultrasoundB = 0;
-int ultratimerA;
-int ultratimerB;
-int ultrathingA;
-int ultrathingB;
-int ultraA;
-int ultraB;
+
+const unsigned int ULTRASONIC_UNKNOWN = __UINT32_MAX__;
+
+ultrasonic_sensor leftUltrasonic = ultrasonic_sensor {.sendPin = 32, .receivePin = 33, .pulseSent = false };
+ultrasonic_sensor rightUltrasonic = ultrasonic_sensor {.sendPin = 30, .receivePin = 31, .pulseSent = false };
+
+void ultrasonic_ping(ultrasonic_sensor *sensor) {
+  sensor->pulseSent = false;
+  digitalWriteFast(sensor->sendPin, HIGH);
+  sensor->startTicks = GPT1_CNT;
+  sensor->value = ULTRASONIC_UNKNOWN;
+  delayMicroseconds(10);
+  digitalWriteFast(sensor->sendPin, LOW);
+  sensor->pulseSent = true;
+}
+
+void ultrasonic_pong(ultrasonic_sensor *sensor) {
+  if (!digitalReadFast(sensor->receivePin) && sensor->pulseSent) {
+    sensor->endTicks = GPT1_CNT;
+    sensor->value = sensor->endTicks - sensor->startTicks;
+    sensor->lastValidValue = sensor->value;
+  }
+}
+
+void ultrasonic_print(ultrasonic_sensor *sensor) {
+  Serial.printf("%d: Value: %u Last Value: %u\r\n", 
+    sensor->sendPin, 
+    sensor->value, 
+    sensor->lastValidValue
+  );
+}
+
 // Read ultrasonic value
 void read_ultrasonic(/* Parameters */){
-  if (GPT1_CNT - ultratimerA > 1000 || GPT1_CNT < ultratimerA) {
-    digitalWrite(32, LOW);
-    digitalWrite(30, LOW);
-    delayMicroseconds(2);
-    digitalWrite(32, HIGH);
-    digitalWrite(30, HIGH);
-    delayMicroseconds(10);
-    digitalWrite(32, LOW);
-    digitalWrite(30, LOW);
-    ultratimerA  = GPT1_CNT;
-    ultratimerB  = GPT1_CNT;
-  } else if ( GPT1_CNT - ultratimerA > 500 || GPT1_CNT < ultratimerA) {
-    if (ultrathingB < ultraB){
-      ultrasoundB = ultrathingB - ultraB;
-    } else {
-      ultrasoundB = 100000;
-    }
-    if (ultrathingA < ultraA){
-      ultrasoundA = ultrathingA - ultraA;
-    } else 
-          ultrasoundA = 100000;
-  }
-//  Serial.print("ultraA:");
-//  Serial.print(ultraA);
-//  
-//  Serial.print(" ultraB:");
-  Serial.print(ultrathingA - ultraA);
-  Serial.print(" ");
-  Serial.print(ultrathingB - ultraB);
-  Serial.println();
-  //Serial.print(ultrasoundB);
->>>>>>> d1cd43b63597b0a7af1b84a980b0ca94686d4c0b
+  ultrasonic_print(&leftUltrasonic);
+  //ultrasonic_print(&rightUltrasonic);
+
+  ultrasonic_ping(&leftUltrasonic);
+  ultrasonic_ping(&rightUltrasonic);
 }
 
 // Read infrared value

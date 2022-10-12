@@ -13,6 +13,21 @@
 #define encoder2PinA 4
 #define encoder2PinB 5
 
+
+typedef struct {
+    uint8_t sendPin;
+    uint8_t receivePin;
+    bool pulseSent;
+
+    unsigned int startTicks;
+    unsigned int endTicks;
+    unsigned int value;
+    unsigned int lastValidValue;
+} ultrasonic_sensor;
+
+void ultrasonic_ping(ultrasonic_sensor *sensor);
+void ultrasonic_pong(ultrasonic_sensor *sensor);
+
 extern SX1509 io;
 extern int Right_sensor;
 extern int Left_sensor;
@@ -40,6 +55,8 @@ extern int ultrathingB;
 extern int ultraA;
 extern int ultraB;
 
+extern ultrasonic_sensor leftUltrasonic;
+extern ultrasonic_sensor rightUltrasonic;
 
 // Read ultrasonic value
 void read_ultrasonic(/* Parameters */);

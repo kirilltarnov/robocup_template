@@ -40,7 +40,7 @@ const byte SX1509_AIO15 = 15;
 
 // Task period Definitions
 // ALL OF THESE VALUES WILL NEED TO BE SET TO SOMETHING USEFUL !!!!!!!!!!!!!!!!!!!!
-#define US_READ_TASK_PERIOD                 80
+#define US_READ_TASK_PERIOD                 200
 #define IR_READ_TASK_PERIOD                 10
 #define COLOUR_READ_TASK_PERIOD             40
 #define SENSOR_TOF_PERIOD                   40
@@ -207,8 +207,8 @@ void pin_init() {
   attachInterrupt(digitalPinToInterrupt(encoder1PinA), doEncoder1A, CHANGE);  //Set up an interrupt for each encoder
   attachInterrupt(digitalPinToInterrupt(encoder2PinA), doEncoder2A, CHANGE);
   
-  attachInterrupt(digitalPinToInterrupt(33), doultrasoundA, CHANGE);
-  attachInterrupt(digitalPinToInterrupt(31), doultrasoundB, CHANGE);
+  attachInterrupt(digitalPinToInterrupt(leftUltrasonic.receivePin), processUltrasoundLeft, CHANGE);
+  attachInterrupt(digitalPinToInterrupt(rightUltrasonic.receivePin), processUltrasoundRight, CHANGE);
   
   right_motor.attach(encoder2serialpin);
   left_motor.attach(encoder1serialpin);
@@ -300,18 +300,10 @@ void doEncoder2A() {
 }
 
 
-void doultrasoundA() {
-    if (digitalReadFast(33)) {
-        ultraA = GPT1_CNT; 
-    } else {
-        ultrathingA = GPT1_CNT; 
-    }
+void processUltrasoundLeft() {
+  ultrasonic_pong(&leftUltrasonic);
 }
 
-void doultrasoundB() {
-      if (digitalReadFast(31)) {
-        ultraB = GPT1_CNT; 
-    } else {
-        ultrathingB = GPT1_CNT; 
-    }
+void processUltrasoundRight() {
+  ultrasonic_pong(&rightUltrasonic);
 }
