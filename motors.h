@@ -35,7 +35,8 @@ extern int joystick_map_x;
 
 
 void check_speed_limits(/*parameters*/);
-void DC_motors();
+void navigation();
+void pickup();
 
 
 #endif /* MOTORS_H_ */

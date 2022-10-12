@@ -21,14 +21,10 @@
 #include <stdlib.h>                  //contains random number generator 
 #include <SparkFunSX1509.h> // Include SX1509 library
 #include <SparkFun_VL53L5CX_Library.h>
-#include <vl53l5cx_plugin_detection_thresholds.h>
 
 // Custom headers
 #include "motors.h"
 #include "sensors.h"
-#include "weight_collection.h"
-#include "return_to_base.h"
-
 
 
 //**********************************************************************************
@@ -39,21 +35,7 @@ const byte SX1509_ADDRESS = 0x3E;  // SX1509 I2C address
 SX1509 io; // Create an SX1509 object to be used throughout
 
 // SX1509 Pins:
-const byte SX1509_AIO0 = 0;
-const byte SX1509_AIO1 = 1;
-const byte SX1509_AIO2 = 2;
-const byte SX1509_AIO3 = 3;
-const byte SX1509_AIO4 = 4;
-const byte SX1509_AIO5 = 5;
-const byte SX1509_AIO6 = 6;
-const byte SX1509_AIO7 = 7;
-const byte SX1509_AIO8 = 8;
-const byte SX1509_AIO9 = 9;
-const byte SX1509_AIO10 = 10;
-const byte SX1509_AIO11 = 11;
-const byte SX1509_AIO12 = 12;
-const byte SX1509_AIO13 = 13;
-const byte SX1509_AIO14 = 14;
+
 const byte SX1509_AIO15 = 15;
 
 // Task period Definitions
@@ -61,11 +43,10 @@ const byte SX1509_AIO15 = 15;
 #define US_READ_TASK_PERIOD                 80
 #define IR_READ_TASK_PERIOD                 10
 #define COLOUR_READ_TASK_PERIOD             40
-#define SENSOR_AVERAGE_PERIOD               40
-#define read_limit_TASK_PERIOD            60
-#define SET_MOTOR_TASK_PERIOD               20
-#define WEIGHT_SCAN_TASK_PERIOD             40
-#define COLLECT_WEIGHT_TASK_PERIOD          40
+#define SENSOR_TOF_PERIOD                   40
+#define read_limit_TASK_PERIOD              60
+#define SET_NAVIGATION_TASK_PERIOD     20
+#define SET_PICKUP_TASK_PERIOD         20
 
         
 
@@ -76,24 +57,15 @@ const byte SX1509_AIO15 = 15;
 // -1 means indefinitely
 #define US_READ_TASK_NUM_EXECUTE           -1
 #define IR_READ_TASK_NUM_EXECUTE           -1
-#define COLOUR_READ_TASK_NUM_EXECUTE       0
-#define read_limit_TASK_NUM_EXECUTE      -1
-#define SENSOR_AVERAGE_NUM_EXECUTE         -1
-#define SET_MOTOR_TASK_NUM_EXECUTE         -1
-#define WEIGHT_SCAN_TASK_NUM_EXECUTE       -1
-#define COLLECT_WEIGHT_TASK_NUM_EXECUTE    0
-#define RETURN_TO_BASE_TASK_NUM_EXECUTE    0
-#define DETECT_BASE_TASK_NUM_EXECUTE       0
-#define UNLOAD_WEIGHTS_TASK_NUM_EXECUTE    0
-#define CHECK_WATCHDOG_TASK_NUM_EXECUTE    0
-#define VICTORY_DANCE_TASK_NUM_EXECUTE     0
+#define COLOUR_READ_TASK_NUM_EXECUTE       -1
+#define read_limit_TASK_NUM_EXECUTE        -1
+#define SENSOR_TOF_NUM_EXECUTE             -1
+#define SET_NAVIGATION_TASK_NUM_EXECUTE         -1
+#define SET_PICKUP_TASK_NUM_EXECUTE        -1
+
 
 // Pin definitions
 #define IO_POWER  49
-#define encoder1PinA 2
-#define encoder1PinB 3
-#define encoder2PinA 4
-#define encoder2PinB 5
 #define encoder3PinA 31 //Pick-up motor encoder
 #define encoder3PinB 30
 #define encoder1serialpin 0
@@ -172,24 +144,10 @@ double measurement_rounded = 0;
 Task tRead_ultrasonic(US_READ_TASK_PERIOD,       US_READ_TASK_NUM_EXECUTE,        &read_ultrasonic);
 Task tRead_infrared(IR_READ_TASK_PERIOD,         IR_READ_TASK_NUM_EXECUTE,        &read_infrared);
 Task tRead_colour(COLOUR_READ_TASK_PERIOD,       COLOUR_READ_TASK_NUM_EXECUTE,    &read_colour);
-Task tread_limit(read_limit_TASK_PERIOD,      SENSOR_AVERAGE_NUM_EXECUTE,      &read_limit);
-Task tSensor_average(SENSOR_AVERAGE_PERIOD,      SENSOR_AVERAGE_NUM_EXECUTE,      &sensor_average);
-//Task tJammingcheck(Jamming_check_period,         Jamming_check_NUM_EXECUTE,       &Jamming);
-// Task to set the motor speeds and direction
-Task tSet_motor(SET_MOTOR_TASK_PERIOD,           SET_MOTOR_TASK_NUM_EXECUTE,      &DC_motors);
-
-// Tasks to scan for weights and collection upon detection
-//Task tWeight_scan(WEIGHT_SCAN_TASK_PERIOD,       WEIGHT_SCAN_TASK_NUM_EXECUTE,    &State_machine);
-//Task tCollect_weight(COLLECT_WEIGHT_TASK_PERIOD, COLLECT_WEIGHT_TASK_NUM_EXECUTE, &collect_weight);
-
-// Tasks to search for bases and unload weights
-//Task tReturn_to_base(RETURN_TO_BASE_TASK_PERIOD, RETURN_TO_BASE_TASK_NUM_EXECUTE, &return_to_base);
-//Task tDetect_base(DETECT_BASE_TASK_PERIOD,       DETECT_BASE_TASK_NUM_EXECUTE,    &detect_base);
-//Task tUnload_weights(UNLOAD_WEIGHTS_TASK_PERIOD, UNLOAD_WEIGHTS_TASK_NUM_EXECUTE, &unload_weights);
-
-// Tasks to check the 'watchdog' timer (These will need to be added in)
-//Task tCheck_watchdog(CHECK_WATCHDOG_TASK_PERIOD, CHECK_WATCHDOG_TASK_NUM_EXECUTE, &check_watchdog);
-//Task tVictory_dance(VICTORY_DANCE_TASK_PERIOD,   VICTORY_DANCE_TASK_NUM_EXECUTE,  &victory_dance);
+Task tread_limit(read_limit_TASK_PERIOD,      read_limit_TASK_NUM_EXECUTE,      &read_limit);
+Task tSensor_average(SENSOR_TOF_PERIOD,      SENSOR_TOF_NUM_EXECUTE,      &SENSOR_TOF);
+Task tnavigation(SET_NAVIGATION_TASK_PERIOD,           SET_NAVIGATION_TASK_NUM_EXECUTE,      &navigation);
+Task tpickup(SET_PICKUP_TASK_PERIOD,           SET_PICKUP_TASK_NUM_EXECUTE,      &pickup);
 
 Scheduler taskManager;
 
@@ -251,21 +209,7 @@ void pin_init() {
     while (1) ;
   }
 
-  io.pinMode(SX1509_AIO0, INPUT);
-  io.pinMode(SX1509_AIO1, INPUT);
-  io.pinMode(SX1509_AIO2, INPUT);
-  io.pinMode(SX1509_AIO3, INPUT);
-  io.pinMode(SX1509_AIO4, INPUT);
-  io.pinMode(SX1509_AIO5, INPUT);
-  io.pinMode(SX1509_AIO6, INPUT);
-  io.pinMode(SX1509_AIO7, INPUT);
-  io.pinMode(SX1509_AIO8, INPUT);
-  io.pinMode(SX1509_AIO9, INPUT);
-  io.pinMode(SX1509_AIO10, INPUT);
-  io.pinMode(SX1509_AIO11, INPUT);
-  io.pinMode(SX1509_AIO12, INPUT);
-  io.pinMode(SX1509_AIO13, INPUT);
-  io.pinMode(SX1509_AIO14, INPUT);
+
   io.pinMode(SX1509_AIO15, INPUT);
 
   my_imagerintit();
@@ -292,32 +236,17 @@ void task_init() {
   taskManager.addTask(tRead_colour);
   taskManager.addTask(tSensor_average);
   taskManager.addTask(tread_limit);
-  taskManager.addTask(tSet_motor);
-  //taskManager.addTask(tWeight_scan);
-//  taskManager.addTask(tCollect_weight);
-//  taskManager.addTask(tReturn_to_base);
-//  taskManager.addTask(tDetect_base);
-//  taskManager.addTask(tUnload_weights);
-  //taskManager.addTask(tJammingcheck);
-
-  //taskManager.addTask(tCheck_watchdog);
-  //taskManager.addTask(tVictory_dance);
-
+  taskManager.addTask(tnavigation);
+  taskManager.addTask(tpickup);
+  
   //enable the tasks
     tRead_ultrasonic.enable();
    tRead_infrared.enable();
-  // tread_encoder.enable();
-  //  tRead_colour.enable();
+    tRead_colour.enable();
     tSensor_average.enable();
    tread_limit.enable();
-   tSet_motor.enable();
-//   tWeight_scan.enable();
-//    tCollect_weight.enable();
-  //  tReturn_to_base.enable();
-  //  tDetect_base.enable();
-  //  tUnload_weights.enable();
-  //tCheck_watchdog.enable();
-  //tVictory_dance.enable();
+   tnavigation.enable();
+   tpickup.enable();
 
   Serial.println("Tasks have been initialised \n");
 }

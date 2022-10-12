@@ -1,6 +1,5 @@
 #include "motors.h"
 #include "Arduino.h"
-#include "weight_collection.h"
 #include "sensors.h"
 bool pickup_calibration_complete = false;
 bool can_trigger = true;
@@ -29,7 +28,7 @@ void check_speed_limits(/*parameters*/) {
 //1500-1950 = anticlockwise
 //1050-1500 = clockwise
 
-void DC_motors() {
+void navigation() {
 
   if(io.digitalRead(15) == 1){
     can_trigger = false;
@@ -138,13 +137,11 @@ void DC_motors() {
         if (Encoder_Left < turn_angle && Encoder_Right > -turn_angle) {
           Navigation_State = Moveforward;
         }
-        break;
-
-
-
-      
+        break; 
   }
 
+}
+void pickup() {
   //Serial.print(pickup_state);
   switch(pickup_state) {
     case 0:
@@ -191,20 +188,6 @@ void DC_motors() {
     }   
   }
 
-//  if(Navigation_State == 1){
-
-//  }else if (Navigation_State == 2) {
-//    right_motor.writeMicroseconds(1050);
-//    left_motor.writeMicroseconds(1050);
-////    right_motor.writeMicroseconds(1500);
-////    left_motor.writeMicroseconds(1500);
-//  } else if (Navigation_State == 3) {
-//    right_motor.writeMicroseconds(1050);
-//    left_motor.writeMicroseconds(1950);
-//  } else if (Navigation_State == 4) {
-//    right_motor.writeMicroseconds(1950);
-//    left_motor.writeMicroseconds(1050);
-//  }
 
 
 }
