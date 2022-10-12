@@ -35,11 +35,13 @@ int VL53_raw_matrix [8][6]; //16 int array to hold previous time-step data
 int VL53_weighted_matrix [8][6]; //16 int array to hold previous time-step data
 int CentiA;
 int CentiB;
+bool US_left_wall_too_close = false;
+bool US_right_wall_too_close = false;
 
 const unsigned int ULTRASONIC_UNKNOWN = __UINT32_MAX__;
 
-ultrasonic_sensor leftUltrasonic = ultrasonic_sensor {.sendPin = 32, .receivePin = 33, .pulseSent = false };
-ultrasonic_sensor rightUltrasonic = ultrasonic_sensor {.sendPin = 30, .receivePin = 31, .pulseSent = false };
+ultrasonic_sensor rightUltrasonic = ultrasonic_sensor {.sendPin = 32, .receivePin = 33, .pulseSent = false };
+ultrasonic_sensor leftUltrasonic = ultrasonic_sensor {.sendPin = 30, .receivePin = 31, .pulseSent = false };
 
 void ultrasonic_ping(ultrasonic_sensor *sensor) {
   sensor->pulseSent = false;
@@ -59,21 +61,48 @@ void ultrasonic_pong(ultrasonic_sensor *sensor) {
   }
 }
 
-void ultrasonic_print(ultrasonic_sensor *sensor) {
-  Serial.printf("%d: Value: %u Last Value: %u\r\n", 
-    sensor->sendPin, 
-    sensor->value, 
-    sensor->lastValidValue
-  );
+void ultrasonic_left_bool(ultrasonic_sensor *sensor) {
+  if (sensor->lastValidValue < 200) {     
+    US_left_wall_too_close = true;
+  } else {
+    US_left_wall_too_close = false; 
+  }
 }
+
+void  ultrasonic_right_bool(ultrasonic_sensor *sensor) {
+  if (sensor->lastValidValue < 200) {
+    US_right_wall_too_close = true;
+  } else {
+    US_right_wall_too_close = false; 
+  }
+}
+
 
 // Read ultrasonic value
 void read_ultrasonic(/* Parameters */){
-  ultrasonic_print(&leftUltrasonic);
+  //ultrasonic_print(&leftUltrasonic);
   //ultrasonic_print(&rightUltrasonic);
 
   ultrasonic_ping(&leftUltrasonic);
   ultrasonic_ping(&rightUltrasonic);
+
+  ultrasonic_left_bool(&leftUltrasonic);
+  ultrasonic_right_bool(&rightUltrasonic);
+
+  if (US_left_wall_too_close == true) {
+    Serial.print("Ultrasonic left too close");
+  } else if (US_right_wall_too_close == true) {
+    Serial.print("Ultrasonic right too close");
+  }
+}
+
+void ultrasonic_print(ultrasonic_sensor *sensor) {
+  // Serial.printf("%d: Value: %u Last Value: %u\r\n", 
+  //   sensor->sendPin, 
+  //   sensor->value, 
+  //   sensor->lastValidValue
+  // );
+  
 }
 
 // Read infrared value
@@ -185,9 +214,9 @@ void SENSOR_TOF(/* Parameters */){
   Serial.println(raw_sum);
 
   //Use raw sums to distinguish between weights and poles/ramps
-  if (raw_sum < 0) {
+  if (raw_sum < 50) {
     //Then something is in the FoV
-    if (raw_sum < -1500) {
+    if (raw_sum < -2000) {
       pole_ramp_found = true; 
       Serial.println("pole ramp found");
     } else if (raw_sum < 0) {
@@ -219,7 +248,7 @@ void SENSOR_TOF(/* Parameters */){
   }
 }
 
-void my_imagerintit() {
+void my_imagerinit() {
   Serial.println("Initializing sensor board. This can take up to 10s. Please wait.");
     
    if (myImager.begin() == false)

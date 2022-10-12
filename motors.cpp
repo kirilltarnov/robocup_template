@@ -58,6 +58,8 @@ void navigation() {
       if ((turning_timer > 20) && (Navigation_State != Deceleration)) {
         Navigation_State = TurnOnSpot; 
         Encoder_Left = 0;
+        Encoder_Right = 0; 
+        turn_angle = 15000; // determine turn angle
       } else {
         turning_timer += 1;
       }
@@ -65,12 +67,12 @@ void navigation() {
       left_motor.writeMicroseconds(1950);
       
       //Checking if there is an obstruction to the left of the robot, turn right
-      if (Left_sensor > 550 && Right_sensor < 550){
+      if ((Left_sensor > 550 && Right_sensor < 550) && (!US_right_wall_too_close)){
         Navigation_State = TurnRight;
         Encoder_Left = 0; //reset encoder values 
         Encoder_Right = 0;
         turn_angle = random(500,3000); // determine turn angle
-      } else if (Left_sensor < 550 && Right_sensor > 550) {
+      } else if ((Left_sensor < 550 && Right_sensor > 550) && (!US_left_wall_too_close)) {
         //Checking if there is an obstruction to the right of the robot, turn left
         Navigation_State = TurnLeft;
         Encoder_Left = 0; //reset encoder values 
@@ -103,9 +105,13 @@ void navigation() {
         right_motor.writeMicroseconds(1050);
         left_motor.writeMicroseconds(1050);
       if ((Encoder_Left < -400 && Encoder_Right < -400)) {
-        if (turn_angle > 6000){
+        if ((turn_angle > 6000) && (!US_left_wall_too_close)){
           Navigation_State = TurnLeft;
+        } else if (!US_right_wall_too_close) {
+          Navigation_State = TurnRight;
         } else {
+          //Turn 180 deg
+          turn_angle = 7500;
           Navigation_State = TurnRight;
         }
         Encoder_Left = 0;
@@ -116,7 +122,7 @@ void navigation() {
     case TurnRight:
       right_motor.writeMicroseconds(1050);
       left_motor.writeMicroseconds(1950);
-      if (Encoder_Left > turn_angle && Encoder_Right < -turn_angle) {
+      if ((Encoder_Left > turn_angle && Encoder_Right < -turn_angle) || (weight_found)) {
         Navigation_State = Moveforward;
       }
       break;
@@ -127,7 +133,7 @@ void navigation() {
       // if(Encoder_Left < -(12000 - turn_angle) && Encoder_Right > (12000 - turn_angle)) {
       //   Navigation_State = Moveforward;
       // }
-      if (Encoder_Left < turn_angle && Encoder_Right > -turn_angle) {
+      if ((Encoder_Left < turn_angle && Encoder_Right > -turn_angle) || (weight_found)) {
         Navigation_State = Moveforward;
       }
       break;
@@ -162,10 +168,9 @@ void navigation() {
         }
         break;
       case TurnOnSpot:
-        right_motor.writeMicroseconds(1100);
-        left_motor.writeMicroseconds(1900);
-        Serial.println(Encoder_Left);
-        if ((Encoder_Left > 15000) || (weight_found)) {
+        right_motor.writeMicroseconds(1080);
+        left_motor.writeMicroseconds(1920);
+        if ((Encoder_Left > turn_angle && Encoder_Right < -turn_angle) || (weight_found)) {
           turning_timer = 0;
           Navigation_State = Moveforward;
         }
@@ -202,7 +207,7 @@ void pickup() {
     //If weight detected, move inward
     case 2:
       if (low_right_sensor > 350) {
-        if (pick_up_counter > 4) {
+        if (pick_up_counter > 2) {
           pickup_state = 1;
         } else {
           pickup_state = 3;

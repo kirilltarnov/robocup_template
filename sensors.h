@@ -57,9 +57,13 @@ extern int ultraB;
 
 extern ultrasonic_sensor leftUltrasonic;
 extern ultrasonic_sensor rightUltrasonic;
+extern bool US_left_wall_too_close;
+extern bool US_right_wall_too_close;
 
 // Read ultrasonic value
 void read_ultrasonic(/* Parameters */);
+void ultrasonic_left_bool(ultrasonic_sensor *sensor);
+void ultrasonic_left_bool(ultrasonic_sensor *sensor);
 
 // Read infrared value
 void read_infrared();
@@ -74,6 +78,6 @@ void sensor_average(/* Parameters */);
 void circ_buffer_add(int input[4][4]);
 
 void SENSOR_TOF();
-void my_imagerintit();
+void my_imagerinit();
 
 #endif /* SENSORS_H_ */

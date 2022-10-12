@@ -45,12 +45,8 @@ const byte SX1509_AIO15 = 15;
 #define COLOUR_READ_TASK_PERIOD             40
 #define SENSOR_TOF_PERIOD                   40
 #define read_limit_TASK_PERIOD              60
-#define SET_NAVIGATION_TASK_PERIOD     20
-#define SET_PICKUP_TASK_PERIOD         20
-
-        
-
-
+#define SET_NAVIGATION_TASK_PERIOD          20
+#define SET_PICKUP_TASK_PERIOD              20    
 
 
 // Task execution amount definitions
@@ -60,7 +56,7 @@ const byte SX1509_AIO15 = 15;
 #define COLOUR_READ_TASK_NUM_EXECUTE       -1
 #define read_limit_TASK_NUM_EXECUTE        -1
 #define SENSOR_TOF_NUM_EXECUTE             -1
-#define SET_NAVIGATION_TASK_NUM_EXECUTE         -1
+#define SET_NAVIGATION_TASK_NUM_EXECUTE    -1
 #define SET_PICKUP_TASK_NUM_EXECUTE        -1
 
 
@@ -99,20 +95,6 @@ boolean A_set2 = false;
 boolean B_set2 = false;
 boolean A_set3 = false;
 boolean B_set3 = false;
-boolean set_thresh_enable = true;
-boolean get_thresh_enable = true;
-boolean set_thresh_status = true;
-boolean get_thresh_status = true;
-
-// uint16_t col_sum[6];
-// uint16_t col_sum_old[6];
-// uint16_t row_sum[8];
-// uint16_t row_sum_old[8];
-// int8_t weight_row_zone = 0;
-// int8_t weight_col_zone = 0;
-int16_t row_difference = 0; 
-int16_t col_difference = 0; 
-
 
 
 Servo right_motor;
@@ -224,7 +206,7 @@ void pin_init() {
 
   io.pinMode(SX1509_AIO15, INPUT);
 
-  my_imagerintit();
+  my_imagerinit();
 }
 
 //**********************************************************************************
