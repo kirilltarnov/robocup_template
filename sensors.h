@@ -31,8 +31,14 @@ extern bool pole_ramp_right;
 extern bool weight_left;
 extern bool weight_right;
 extern bool weight_middle;
-extern int CentiA;
-extern int CentiB;
+extern int ultrasoundA;
+extern int ultrasoundB;
+extern int ultratimerA;
+extern int ultratimerB;
+extern int ultrathingA;
+extern int ultrathingB;
+extern int ultraA;
+extern int ultraB;
 
 
 // Read ultrasonic value

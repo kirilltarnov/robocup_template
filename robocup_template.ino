@@ -176,6 +176,14 @@ void setup() {
 //**********************************************************************************
 void pin_init() {
 
+    // Set up the timer source
+    // Bits 8 - 6 indicate to use the 24MHz internal high speed clock
+    // Bit 0 enables the counter
+    GPT1_CR = (GPT1_CR & (~(1 << 6 | 1 << 8))) | (1 << 7) | (1 << 0); 
+
+    // Set the prescaler to 35 so that 1mm = 1 tick
+    GPT1_PR = 140; 
+
   Serial.println("Pins have been initialised \n");
 
   pinMode(IO_POWER, OUTPUT);              //Pin 49 is used to enable IO power
@@ -191,13 +199,17 @@ void pin_init() {
   pinMode(33, INPUT);
   pinMode(30, OUTPUT);
   pinMode(31,INPUT);
+
+  Adafruit_TCS34725 tcs = Adafruit_TCS34725(TCS34725_INTEGRATIONTIME_50MS, TCS34725_GAIN_4X);
   
 
   pinMode(limit_switch2_pin, INPUT);
   attachInterrupt(digitalPinToInterrupt(encoder1PinA), doEncoder1A, CHANGE);  //Set up an interrupt for each encoder
   attachInterrupt(digitalPinToInterrupt(encoder2PinA), doEncoder2A, CHANGE);
-  attachInterrupt(digitalPinToInterrupt(encoder3PinA), doEncoder3A, CHANGE);
-
+  
+  attachInterrupt(digitalPinToInterrupt(33), doultrasoundA, CHANGE);
+  attachInterrupt(digitalPinToInterrupt(31), doultrasoundB, CHANGE);
+  
   right_motor.attach(encoder2serialpin);
   left_motor.attach(encoder1serialpin);
   //Gate_servo.attach(7);
@@ -287,13 +299,19 @@ void doEncoder2A() {
   Encoder_Left -= (A_set2 == B_set2) ? +1 : -1;
 }
 
-void doEncoder3A() {
-  // Test transition
-  A_set3 = digitalRead(encoder3PinA) == HIGH;
-  // and adjust counter + if A leads B
-  encoder_pickup += (A_set3 != B_set3) ? +1 : -1;
 
-  B_set3 = digitalRead(encoder3PinB) == HIGH;
-  // and adjust counter + if B follows A
-  encoder_pickup += (A_set3 == B_set3) ? +1 : -1;
+void doultrasoundA() {
+    if (digitalReadFast(33)) {
+        ultraA = GPT1_CNT; 
+    } else {
+        ultrathingA = GPT1_CNT; 
+    }
+}
+
+void doultrasoundB() {
+      if (digitalReadFast(31)) {
+        ultraB = GPT1_CNT; 
+    } else {
+        ultrathingB = GPT1_CNT; 
+    }
 }

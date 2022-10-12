@@ -35,20 +35,47 @@ int VL53_raw_matrix [8][6]; //16 int array to hold previous time-step data
 int VL53_weighted_matrix [8][6]; //16 int array to hold previous time-step data
 int CentiA;
 int CentiB;
-
+int ultrasoundA = 0;
+int ultrasoundB = 0;
+int ultratimerA;
+int ultratimerB;
+int ultrathingA;
+int ultrathingB;
+int ultraA;
+int ultraB;
 // Read ultrasonic value
 void read_ultrasonic(/* Parameters */){
-//    digitalWrite(32, LOW);
-//    digitalWrite(30, LOW);
-//  delayMicroseconds(2);
-//  digitalWrite(32, HIGH);
-//  digitalWrite(30, HIGH);
-//  delayMicroseconds(10);
-//  digitalWrite(32, LOW);
-//  digitalWrite(30, LOW);
-//    CentiA = pulseIn(33, HIGH);
-//    CentiB =  pulseIn(31, HIGH);
-  
+  if (GPT1_CNT - ultratimerA > 1000 || GPT1_CNT < ultratimerA) {
+    digitalWrite(32, LOW);
+    digitalWrite(30, LOW);
+    delayMicroseconds(2);
+    digitalWrite(32, HIGH);
+    digitalWrite(30, HIGH);
+    delayMicroseconds(10);
+    digitalWrite(32, LOW);
+    digitalWrite(30, LOW);
+    ultratimerA  = GPT1_CNT;
+    ultratimerB  = GPT1_CNT;
+  } else if ( GPT1_CNT - ultratimerA > 500 || GPT1_CNT < ultratimerA) {
+    if (ultrathingB < ultraB){
+      ultrasoundB = ultrathingB - ultraB;
+    } else {
+      ultrasoundB = 100000;
+    }
+    if (ultrathingA < ultraA){
+      ultrasoundA = ultrathingA - ultraA;
+    } else 
+          ultrasoundA = 100000;
+  }
+//  Serial.print("ultraA:");
+//  Serial.print(ultraA);
+//  
+//  Serial.print(" ultraB:");
+  Serial.print(ultrathingA - ultraA);
+  Serial.print(" ");
+  Serial.print(ultrathingB - ultraB);
+  Serial.println();
+  //Serial.print(ultrasoundB);
 }
 
 // Read infrared value
@@ -68,7 +95,7 @@ void read_infrared(){
 
 // Read colour sensor value
 void read_colour(/* Parameters */){
-//  Serial.println("colour value \n");  
+  
 }
 
 void read_limit() {

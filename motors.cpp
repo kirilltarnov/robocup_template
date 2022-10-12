@@ -169,12 +169,12 @@ void navigation() {
         break;
   
  }
-  Serial.print("pick_up state: ");
-  Serial.print(pickup_state);
-  Serial.print(" Decel :");
-  Serial.println(decel);
+//  Serial.print("pick_up state: ");
+//  Serial.print(pickup_state);
+//  Serial.print(" Decel :");
+//  Serial.println(decel);
   // Serial.println(low_right_sensor);
-  Serial.println(jam_timer);
+//  Serial.println(jam_timer);
 }
 void pickup() {
   switch(pickup_state) {
