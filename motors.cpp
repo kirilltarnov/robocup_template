@@ -37,11 +37,7 @@ void DC_motors() {
     can_trigger = false;
   }
 
-  if ((turning_timer > 80) && (Navigation_State != Deceleration)) {
-    Navigation_State = TurnOnSpot; 
-  } else {
-    turning_timer += 1;
-  }
+
   //monitoring
 //  Serial.print("Navigation State: ");
 //  Serial.print(Navigation_State);
@@ -60,6 +56,12 @@ void DC_motors() {
       break;
       
     case Moveforward:
+      if ((turning_timer > 20) && (Navigation_State != Deceleration)) {
+        Navigation_State = TurnOnSpot; 
+        Encoder_Left = 0;
+      } else {
+        turning_timer += 1;
+      }
       right_motor.writeMicroseconds(1950);
       left_motor.writeMicroseconds(1950);
       
@@ -161,21 +163,22 @@ void DC_motors() {
         }
         break;
       case TurnOnSpot:
-        Encoder_Right = 0;
-        right_motor.writeMicroseconds(1950);
-        left_motor.writeMicroseconds(1050);
-        if ((Encoder_Right > -1500) || (weight_found)) {
+        right_motor.writeMicroseconds(1100);
+        left_motor.writeMicroseconds(1900);
+        Serial.println(Encoder_Left);
+        if ((Encoder_Left > 15000) || (weight_found)) {
+          turning_timer = 0;
           Navigation_State = Moveforward;
         }
         break;
   
  }
-  Serial.print("pick_up state: ");
-  Serial.print(pickup_state);
-  Serial.print(" Decel :");
-  Serial.println(decel);
+  // Serial.print("pick_up state: ");
+  // Serial.print(pickup_state);
+  // Serial.print(" Decel :");
+  // Serial.println(decel);
   // Serial.println(low_right_sensor);
-  Serial.println(jam_timer);
+  //Serial.println(jam_timer);
   switch(pickup_state) {
     case 0:
     //Use joystick before Start PB is pressed

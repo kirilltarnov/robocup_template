@@ -36,19 +36,28 @@ int VL53_raw_matrix [8][6]; //16 int array to hold previous time-step data
 int VL53_weighted_matrix [8][6]; //16 int array to hold previous time-step data
 int CentiA;
 int CentiB;
+const int AtrigPin = 32;
+const int AechoPin = 33;
+
+const int BtrigPin = 30;
+const int BechoPin = 31;
+long durationA,durationB;
 
 // Read ultrasonic value
-void read_ultrasonic(/* Parameters */){
-    digitalWrite(32, LOW);
-    digitalWrite(30, LOW);
-  delayMicroseconds(2);
-  digitalWrite(32, HIGH);
-  digitalWrite(30, HIGH);
-  delayMicroseconds(10);
-  digitalWrite(32, LOW);
-  digitalWrite(30, LOW);
-    CentiA = pulseIn(33, HIGH);
-    CentiB =  pulseIn(31, HIGH);
+void read_ultrasonic(void){
+  // //send signal out
+  // digitalWrite(AtrigPin, LOW);
+  // //digitalWrite(BtrigPin, LOW);
+  // //delayMicroseconds(2);
+  // digitalWrite(AtrigPin, HIGH);
+  // //digitalWrite(BtrigPin, HIGH);
+  // //delayMicroseconds(10);
+  // digitalWrite(AtrigPin, LOW);
+  // //digitalWrite(BtrigPin, LOW);
+  
+  // durationA = pulseIn(AechoPin, HIGH,10);
+  // //durationB = pulseIn(BechoPin, HIGH,0);
+  // Serial.println(durationA);
   
 }
 
@@ -152,17 +161,17 @@ void sensor_average(/* Parameters */){
         //  measurement_rounded = int(measurement_rounded); //convert from double to int
         VL53_raw_matrix[y/imageWidth][x] = measurementData.distance_mm[x+y]; //place rounded data in a matrix 
         if (x == 5) {
-          VL53_raw_matrix[y/imageWidth][x] -= 490;
+          VL53_raw_matrix[y/imageWidth][x] -= 700;
         } else if (x == 4) {
-          VL53_raw_matrix[y/imageWidth][x] -= 400;
+          VL53_raw_matrix[y/imageWidth][x] -= 500;
         } else if (x == 3) {
-          VL53_raw_matrix[y/imageWidth][x] -= 340;
+          VL53_raw_matrix[y/imageWidth][x] -= 400;
         } else if (x == 2) {
-          VL53_raw_matrix[y/imageWidth][x] -= 300;
+          VL53_raw_matrix[y/imageWidth][x] -= 350;
         } else if (x == 1) {
-          VL53_raw_matrix[y/imageWidth][x] -= 280;
+          VL53_raw_matrix[y/imageWidth][x] -= 300;
         } else if (x == 0) {
-          VL53_raw_matrix[y/imageWidth][x] -= 250;
+          VL53_raw_matrix[y/imageWidth][x] -= 270;
         } 
         if (y == imageWidth*7) {
           VL53_weighted_matrix[y/imageWidth][x] = VL53_raw_matrix[y/imageWidth][x] * -1;
@@ -201,8 +210,8 @@ void sensor_average(/* Parameters */){
     }
   }
 
-  // Serial.print("Raw sum: ");
-  // Serial.print(raw_sum);
+  Serial.print("Raw sum: ");
+  Serial.println(raw_sum);
 
   //Use raw sums to distinguish between weights and poles/ramps
   if (raw_sum < 0) {
@@ -210,7 +219,7 @@ void sensor_average(/* Parameters */){
     if (raw_sum < -1500) {
       pole_ramp_found = true; 
       Serial.println("pole ramp found");
-    } else {
+    } else if (raw_sum < 0) {
       weight_found = true; 
       Serial.println("weight found");
     }
