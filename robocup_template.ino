@@ -307,7 +307,7 @@ void task_init() {
    tRead_infrared.enable();
   // tread_encoder.enable();
   //  tRead_colour.enable();
-    tSensor_average.enable();
+   tSensor_average.enable();
    tread_limit.enable();
    tSet_motor.enable();
 //   tWeight_scan.enable();
@@ -332,6 +332,7 @@ void loop() {
   //Joystick for testing only
   joystick_x_pos = analogRead(JOYSTICK_PIN);
   joystick_map_x = map(joystick_x_pos, 0, 950, 1050, 1950);
+
 
   // Serial.print("Left sensor: ");
   // Serial.println(Left_sensor);

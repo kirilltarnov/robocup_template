@@ -23,6 +23,8 @@
 #define TurnLeft                4
 #define BankLeft                5
 #define BankRight               6
+#define Deceleration            7
+#define TurnOnSpot              8
 
 extern Servo right_motor;
 extern Servo left_motor;
